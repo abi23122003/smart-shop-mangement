@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.smartshop.backend.dto.ProductDTO;
 import com.smartshop.backend.entity.Product;
+import com.smartshop.backend.mapper.ProductMapper;
 import com.smartshop.backend.repository.ProductRepository;
 
 @Service
@@ -14,17 +16,28 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Product saveProduct(Product product) {
-        return productRepository.save(product);
-    }
+   public ProductDTO saveProduct(ProductDTO productDTO) {
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
-public Optional<Product> getProductById(Long id) {
-    return productRepository.findById(id);
+    Product product = ProductMapper.toEntity(productDTO);
+
+    Product savedProduct = productRepository.save(product);
+
+    return ProductMapper.toDTO(savedProduct);
 }
-    public Product updateProduct(Long id, Product updatedProduct) {
+
+public List<ProductDTO> getAllProducts() {
+    List<Product> products = productRepository.findAll();
+    return products.stream()
+            .map(ProductMapper::toDTO)
+            .toList();
+}
+public Optional<ProductDTO> getProductById(Long id) {
+
+    Optional<Product> product = productRepository.findById(id);
+
+    return product.map(ProductMapper::toDTO);
+}
+    public ProductDTO updateProduct(Long id, ProductDTO updatedProduct){
 
     Optional<Product> existingProduct = productRepository.findById(id);
 
@@ -47,7 +60,9 @@ public Optional<Product> getProductById(Long id) {
         product.setExpiryApplicable(updatedProduct.getExpiryApplicable());
         product.setActive(updatedProduct.getActive());
 
-        return productRepository.save(product);
+        Product savedProduct = productRepository.save(product);
+
+        return ProductMapper.toDTO(savedProduct);
     }
 
     return null;

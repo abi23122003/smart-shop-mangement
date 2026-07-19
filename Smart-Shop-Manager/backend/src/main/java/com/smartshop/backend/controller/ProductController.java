@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smartshop.backend.entity.Product;
+import com.smartshop.backend.dto.ProductDTO;
 import com.smartshop.backend.service.ProductService;
 
 @RestController
@@ -22,24 +22,24 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping
-    public Product saveProduct(@RequestBody Product product) {
-        return productService.saveProduct(product);
-    }
-     @GetMapping
-     public List<Product> getAllProducts() {
-     return productService.getAllProducts();
-     }
-    @GetMapping("/{id}")
-    public Optional<Product> getProductById(@PathVariable Long id) {
+ @PostMapping
+public ProductDTO saveProduct(@RequestBody ProductDTO productDTO) {
+    return productService.saveProduct(productDTO);
+}
+@GetMapping
+public List<ProductDTO> getAllProducts() {
+    return productService.getAllProducts();
+}
+@GetMapping("/{id}")
+public Optional<ProductDTO> getProductById(@PathVariable Long id) {
     return productService.getProductById(id);
-}  
-@PutMapping("/{id}")
-public Product updateProduct(@PathVariable Long id,
-                             @RequestBody Product product) {
-
-    return productService.updateProduct(id, product);
 } 
+@PutMapping("/{id}")
+public ProductDTO updateProduct(@PathVariable Long id,
+                                @RequestBody ProductDTO productDTO) {
+
+    return productService.updateProduct(id, productDTO);
+}
 @DeleteMapping("/{id}")
 public String deleteProduct(@PathVariable Long id) {
 
