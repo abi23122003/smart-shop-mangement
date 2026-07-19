@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.smartshop.backend.dto.ProductDTO;
 import com.smartshop.backend.service.ProductService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -23,7 +25,7 @@ public class ProductController {
     private ProductService productService;
 
  @PostMapping
-public ProductDTO saveProduct(@RequestBody ProductDTO productDTO) {
+   public ProductDTO saveProduct(@Valid @RequestBody ProductDTO productDTO) {
     return productService.saveProduct(productDTO);
 }
 @GetMapping

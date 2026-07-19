@@ -2,6 +2,7 @@ package com.smartshop.backend.dto;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class ProductDTO {
     private Long id;
     private String productCode;
     private String barcode;
+    @NotBlank(message = "Product Name is required")
     private String productName;
     private String brand;
     private String category;
