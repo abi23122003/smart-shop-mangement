@@ -49,6 +49,12 @@ public Page<ProductDTO> getProductsByPage(
 
     return productService.getProductsByPage(page, size);
 }
+@GetMapping("/sort")
+public List<ProductDTO> getProductsSorted(
+        @RequestParam String field) {
+
+    return productService.getProductsSorted(field);
+}
 @GetMapping("/{id}")
 public Optional<ProductDTO> getProductById(@PathVariable Long id) {
     return productService.getProductById(id);

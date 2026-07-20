@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.smartshop.backend.dto.ProductDTO;
@@ -49,6 +50,15 @@ public Page<ProductDTO> getProductsByPage(int page, int size) {
             productRepository.findAll(PageRequest.of(page, size));
 
     return products.map(ProductMapper::toDTO);
+}
+public List<ProductDTO> getProductsSorted(String field) {
+
+    List<Product> products =
+            productRepository.findAll(Sort.by(field));
+
+    return products.stream()
+            .map(ProductMapper::toDTO)
+            .toList();
 }
 public Optional<ProductDTO> getProductById(Long id) {
 
