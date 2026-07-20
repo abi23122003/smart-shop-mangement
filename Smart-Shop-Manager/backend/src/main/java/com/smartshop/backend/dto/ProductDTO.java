@@ -20,7 +20,7 @@ public class ProductDTO {
     @NotBlank(message = "Product Name is required")
     private String productName;
     private String brand;
-    private String category;
+    private Long categoryId;
     private String variant;
     private String unit;
     private Integer quantity;

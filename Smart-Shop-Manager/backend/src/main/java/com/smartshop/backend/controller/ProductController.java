@@ -107,8 +107,9 @@ public List<ChartDataDTO> getInventoryValueChartData() {
     return productService.getInventoryValueChartData();
 }
 @PutMapping("/{id}")
-public ProductDTO updateProduct(@PathVariable Long id,
-                                @RequestBody ProductDTO productDTO) {
+public ProductDTO updateProduct(
+        @PathVariable Long id,
+        @Valid @RequestBody ProductDTO productDTO) {
 
     return productService.updateProduct(id, productDTO);
 }

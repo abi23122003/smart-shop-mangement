@@ -2,14 +2,14 @@ package com.smartshop.backend.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
+import com.smartshop.backend.entity.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
+import com.smartshop.backend.repository.CategoryRepository;
 import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.dto.ProductDTO;
 import com.smartshop.backend.dto.ProductStatisticsDTO;
@@ -22,10 +22,17 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-   public ProductDTO saveProduct(ProductDTO productDTO) {
+ public ProductDTO saveProduct(ProductDTO productDTO) {
 
     Product product = ProductMapper.toEntity(productDTO);
+
+    Category category = categoryRepository.findById(productDTO.getCategoryId())
+            .orElseThrow(() -> new RuntimeException("Category not found"));
+
+    product.setCategory(category);
 
     Product savedProduct = productRepository.save(product);
 
@@ -148,7 +155,10 @@ public Optional<ProductDTO> getProductById(Long id) {
         product.setBarcode(updatedProduct.getBarcode());
         product.setProductName(updatedProduct.getProductName());
         product.setBrand(updatedProduct.getBrand());
-        product.setCategory(updatedProduct.getCategory());
+        Category category = categoryRepository.findById(updatedProduct.getCategoryId())
+        .orElseThrow(() -> new RuntimeException("Category not found"));
+
+product.setCategory(category);
         product.setVariant(updatedProduct.getVariant());
         product.setUnit(updatedProduct.getUnit());
         product.setQuantity(updatedProduct.getQuantity());
