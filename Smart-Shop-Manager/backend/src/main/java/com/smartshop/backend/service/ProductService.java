@@ -1,4 +1,5 @@
 package com.smartshop.backend.service;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +79,22 @@ public Page<ProductDTO> filterProducts(
                     pageable);
 
     return products.map(ProductMapper::toDTO);
+}
+public List<ProductDTO> getLowStockProducts() {
+
+    List<Product> products = productRepository.findLowStockProducts();
+
+    return products.stream()
+            .map(ProductMapper::toDTO)
+            .toList();
+}
+public List<ProductDTO> getExpiringProducts(LocalDate date) {
+
+    List<Product> products = productRepository.findByExpiryDateBefore(date);
+
+    return products.stream()
+            .map(ProductMapper::toDTO)
+            .toList();
 }
 public Optional<ProductDTO> getProductById(Long id) {
 

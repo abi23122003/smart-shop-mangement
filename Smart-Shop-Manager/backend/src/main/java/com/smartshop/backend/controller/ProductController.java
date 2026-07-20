@@ -1,4 +1,5 @@
 package com.smartshop.backend.controller;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +67,19 @@ public Page<ProductDTO> filterProducts(
             size,
             sortField);
 }
+@GetMapping("/low-stock")
+public List<ProductDTO> getLowStockProducts() {
+
+    return productService.getLowStockProducts();
+}
+@GetMapping("/expiring")
+public List<ProductDTO> getExpiringProducts(
+        @RequestParam LocalDate date) {
+
+    return productService.getExpiringProducts(date);
+}
 @GetMapping("/sort")
+
 public List<ProductDTO> getProductsSorted(
         @RequestParam String field) {
 
