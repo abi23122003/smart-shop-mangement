@@ -3,6 +3,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.smartshop.backend.dto.ProductDTO;
@@ -30,6 +32,23 @@ public List<ProductDTO> getAllProducts() {
     return products.stream()
             .map(ProductMapper::toDTO)
             .toList();
+}
+
+public List<ProductDTO> searchProducts(String keyword) {
+
+    List<Product> products = productRepository
+            .findByProductNameContainingIgnoreCase(keyword);
+
+    return products.stream()
+            .map(ProductMapper::toDTO)
+            .toList();
+}
+public Page<ProductDTO> getProductsByPage(int page, int size) {
+
+    Page<Product> products =
+            productRepository.findAll(PageRequest.of(page, size));
+
+    return products.map(ProductMapper::toDTO);
 }
 public Optional<ProductDTO> getProductById(Long id) {
 
