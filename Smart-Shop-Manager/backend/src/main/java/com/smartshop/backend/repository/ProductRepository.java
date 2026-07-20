@@ -7,8 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.entity.Product;
 
 @Repository
@@ -21,4 +23,21 @@ Page<Product> findByProductNameContainingIgnoreCase(
 @Query("SELECT p FROM Product p WHERE p.quantity <= p.minimumStock")
 List<Product> findLowStockProducts();
 List<Product> findByExpiryDateBefore(LocalDate date);
+@Query("SELECT COUNT(p) FROM Product p WHERE p.quantity <= p.minimumStock")
+long countLowStockProducts();
+@Query("SELECT COUNT(p) FROM Product p WHERE p.quantity = 0")
+long countOutOfStockProducts();
+@Query("SELECT COUNT(p) FROM Product p WHERE p.expiryDate <= :date")
+long countExpiringProducts(@Param("date") LocalDate date);
+@Query("SELECT SUM(p.sellingPrice * p.quantity) FROM Product p")
+Double getTotalInventoryValue();
+@Query("""
+    SELECT new com.smartshop.backend.dto.ChartDataDTO(
+        p.productName,
+        CAST(p.quantity AS double)
+    )
+    FROM Product p
+    ORDER BY p.quantity DESC
+""")
+List<ChartDataDTO> getStockChartData();
 }

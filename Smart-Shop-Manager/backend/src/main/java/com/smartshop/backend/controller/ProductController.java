@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.dto.ProductDTO;
+import com.smartshop.backend.dto.ProductStatisticsDTO;
 import com.smartshop.backend.service.ProductService;
 
 import jakarta.validation.Valid;
@@ -89,6 +91,16 @@ public List<ProductDTO> getProductsSorted(
 public Optional<ProductDTO> getProductById(@PathVariable Long id) {
     return productService.getProductById(id);
 } 
+@GetMapping("/statistics")
+public ProductStatisticsDTO getProductStatistics() {
+
+    return productService.getProductStatistics();
+}
+@GetMapping("/charts/stock")
+public List<ChartDataDTO> getStockChartData() {
+
+    return productService.getStockChartData();
+}
 @PutMapping("/{id}")
 public ProductDTO updateProduct(@PathVariable Long id,
                                 @RequestBody ProductDTO productDTO) {
@@ -101,5 +113,6 @@ public String deleteProduct(@PathVariable Long id) {
     productService.deleteProduct(id);
 
     return "Product deleted successfully!";
+
 }
 }

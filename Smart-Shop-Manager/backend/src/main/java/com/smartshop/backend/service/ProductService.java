@@ -10,7 +10,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.dto.ProductDTO;
+import com.smartshop.backend.dto.ProductStatisticsDTO;
 import com.smartshop.backend.entity.Product;
 import com.smartshop.backend.mapper.ProductMapper;
 import com.smartshop.backend.repository.ProductRepository;
@@ -95,6 +97,34 @@ public List<ProductDTO> getExpiringProducts(LocalDate date) {
     return products.stream()
             .map(ProductMapper::toDTO)
             .toList();
+}
+public ProductStatisticsDTO getProductStatistics() {
+
+    long totalProducts = productRepository.count();
+
+    long lowStockProducts = productRepository.countLowStockProducts();
+
+    long outOfStockProducts = productRepository.countOutOfStockProducts();
+
+    long expiringProducts = productRepository.countExpiringProducts(LocalDate.now());
+
+    Double inventoryValue = productRepository.getTotalInventoryValue();
+
+    if (inventoryValue == null) {
+        inventoryValue = 0.0;
+    }
+
+    return new ProductStatisticsDTO(
+            totalProducts,
+            lowStockProducts,
+            outOfStockProducts,
+            expiringProducts,
+            inventoryValue
+    );
+}
+public List<ChartDataDTO> getStockChartData() {
+
+    return productRepository.getStockChartData();
 }
 public Optional<ProductDTO> getProductById(Long id) {
 
