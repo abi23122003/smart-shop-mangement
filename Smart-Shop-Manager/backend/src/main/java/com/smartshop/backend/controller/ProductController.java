@@ -49,6 +49,23 @@ public Page<ProductDTO> getProductsByPage(
 
     return productService.getProductsByPage(page, size);
 }
+@GetMapping("/filter")
+public Page<ProductDTO> filterProducts(
+
+        @RequestParam String keyword,
+
+        @RequestParam int page,
+
+        @RequestParam int size,
+
+        @RequestParam String sortField) {
+
+    return productService.filterProducts(
+            keyword,
+            page,
+            size,
+            sortField);
+}
 @GetMapping("/sort")
 public List<ProductDTO> getProductsSorted(
         @RequestParam String field) {

@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +60,24 @@ public List<ProductDTO> getProductsSorted(String field) {
     return products.stream()
             .map(ProductMapper::toDTO)
             .toList();
+}
+public Page<ProductDTO> filterProducts(
+        String keyword,
+        int page,
+        int size,
+        String sortField) {
+
+    Pageable pageable = PageRequest.of(
+            page,
+            size,
+            Sort.by(sortField));
+
+    Page<Product> products =
+            productRepository.findByProductNameContainingIgnoreCase(
+                    keyword,
+                    pageable);
+
+    return products.map(ProductMapper::toDTO);
 }
 public Optional<ProductDTO> getProductById(Long id) {
 
