@@ -101,6 +101,11 @@ public List<ChartDataDTO> getStockChartData() {
 
     return productService.getStockChartData();
 }
+@GetMapping("/charts/inventory-value")
+public List<ChartDataDTO> getInventoryValueChartData() {
+
+    return productService.getInventoryValueChartData();
+}
 @PutMapping("/{id}")
 public ProductDTO updateProduct(@PathVariable Long id,
                                 @RequestBody ProductDTO productDTO) {

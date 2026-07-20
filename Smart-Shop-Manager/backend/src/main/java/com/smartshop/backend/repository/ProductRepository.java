@@ -40,4 +40,13 @@ Double getTotalInventoryValue();
     ORDER BY p.quantity DESC
 """)
 List<ChartDataDTO> getStockChartData();
+@Query("""
+    SELECT new com.smartshop.backend.dto.ChartDataDTO(
+        p.productName,
+        (p.sellingPrice * p.quantity)
+    )
+    FROM Product p
+    ORDER BY (p.sellingPrice * p.quantity) DESC
+""")
+List<ChartDataDTO> getInventoryValueChartData();
 }

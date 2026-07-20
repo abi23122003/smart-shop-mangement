@@ -126,6 +126,10 @@ public List<ChartDataDTO> getStockChartData() {
 
     return productRepository.getStockChartData();
 }
+public List<ChartDataDTO> getInventoryValueChartData() {
+
+    return productRepository.getInventoryValueChartData();
+}
 public Optional<ProductDTO> getProductById(Long id) {
 
     Optional<Product> product = productRepository.findById(id);
