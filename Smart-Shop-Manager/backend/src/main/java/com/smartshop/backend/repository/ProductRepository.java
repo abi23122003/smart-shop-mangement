@@ -49,4 +49,5 @@ List<ChartDataDTO> getStockChartData();
     ORDER BY (p.sellingPrice * p.quantity) DESC
 """)
 List<ChartDataDTO> getInventoryValueChartData();
+long countByQuantityLessThanEqual(Integer minimumStock);
 }
