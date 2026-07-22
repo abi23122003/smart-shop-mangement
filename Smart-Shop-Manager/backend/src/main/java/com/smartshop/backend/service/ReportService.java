@@ -6,17 +6,20 @@ import org.springframework.stereotype.Service;
 import com.smartshop.backend.dto.SalesReportDTO;
 import com.smartshop.backend.entity.Sale;
 import com.smartshop.backend.repository.SaleRepository;
-
 import lombok.RequiredArgsConstructor;
 import com.smartshop.backend.dto.PurchaseReportDTO;
 import com.smartshop.backend.entity.Purchase;
+import com.smartshop.backend.entity.Product;
 import com.smartshop.backend.repository.PurchaseRepository;
+import com.smartshop.backend.dto.ProductReportDTO;
+import com.smartshop.backend.repository.ProductRepository;
 @Service
 @RequiredArgsConstructor
 public class ReportService {
 
     private final SaleRepository saleRepository;
     private final PurchaseRepository purchaseRepository;
+    private final ProductRepository productRepository;
 
     public List<SalesReportDTO> getSalesReport() {
 
@@ -46,6 +49,33 @@ private PurchaseReportDTO convertPurchaseToDTO(Purchase purchase) {
 
     dto.setPurchaseDate(purchase.getPurchaseDate().toString());
     dto.setTotalAmount(purchase.getTotalAmount());
+
+    return dto;
+}
+public List<ProductReportDTO> getProductReport() {
+
+    return productRepository.findAll()
+            .stream()
+            .map(this::convertProductToDTO)
+            .toList();
+}
+private ProductReportDTO convertProductToDTO(Product product) {
+
+    ProductReportDTO dto = new ProductReportDTO();
+
+    dto.setProductCode(product.getProductCode());
+    dto.setProductName(product.getProductName());
+
+    if (product.getCategory() != null) {
+       dto.setCategoryName(product.getCategory().getName());
+    } else {
+        dto.setCategoryName("No Category");
+    }
+
+    dto.setBrand(product.getBrand());
+    dto.setQuantity(product.getQuantity());
+    dto.setPurchasePrice(product.getPurchasePrice());
+    dto.setSellingPrice(product.getSellingPrice());
 
     return dto;
 }

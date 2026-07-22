@@ -12,10 +12,8 @@ import org.springframework.stereotype.Repository;
 
 import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.entity.Product;
-
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
 List<Product> findByProductNameContainingIgnoreCase(String keyword);
 Page<Product> findByProductNameContainingIgnoreCase(
         String keyword,

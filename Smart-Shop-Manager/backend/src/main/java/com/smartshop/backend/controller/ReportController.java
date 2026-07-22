@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smartshop.backend.dto.PurchaseReportDTO;
 import com.smartshop.backend.dto.SalesReportDTO;
+import com.smartshop.backend.dto.ProductReportDTO;
 import com.smartshop.backend.service.ReportService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,9 @@ public class ReportController {
     @GetMapping("/purchases")
 public List<PurchaseReportDTO> getPurchaseReport() {
     return reportService.getPurchaseReport();
+}
+@GetMapping("/products")
+public List<ProductReportDTO> getProductReport() {
+    return reportService.getProductReport();
 }
 }
