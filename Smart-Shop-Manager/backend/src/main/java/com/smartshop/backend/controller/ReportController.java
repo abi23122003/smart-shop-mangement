@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smartshop.backend.dto.PurchaseReportDTO;
 import com.smartshop.backend.dto.SalesReportDTO;
 import com.smartshop.backend.service.ReportService;
 
@@ -24,4 +25,8 @@ public class ReportController {
     public List<SalesReportDTO> getSalesReport() {
         return reportService.getSalesReport();
     }
+    @GetMapping("/purchases")
+public List<PurchaseReportDTO> getPurchaseReport() {
+    return reportService.getPurchaseReport();
+}
 }
