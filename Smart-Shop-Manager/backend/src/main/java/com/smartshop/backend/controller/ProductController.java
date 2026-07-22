@@ -81,11 +81,11 @@ public List<ProductDTO> getExpiringProducts(
     return productService.getExpiringProducts(date);
 }
 @GetMapping("/sort")
-
 public List<ProductDTO> getProductsSorted(
-        @RequestParam String field) {
+        @RequestParam String field,
+        @RequestParam(defaultValue = "asc") String direction) {
 
-    return productService.getProductsSorted(field);
+    return productService.getProductsSorted(field, direction);
 }
 @GetMapping("/{id}")
 public Optional<ProductDTO> getProductById(@PathVariable Long id) {
@@ -121,4 +121,5 @@ public String deleteProduct(@PathVariable Long id) {
     return "Product deleted successfully!";
 
 }
+
 }

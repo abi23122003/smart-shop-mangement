@@ -48,8 +48,7 @@ public List<ProductDTO> getAllProducts() {
 
 public List<ProductDTO> searchProducts(String keyword) {
 
-    List<Product> products = productRepository
-            .findByProductNameContainingIgnoreCase(keyword);
+    List<Product> products = productRepository.searchProducts(keyword);
 
     return products.stream()
             .map(ProductMapper::toDTO)
@@ -62,10 +61,13 @@ public Page<ProductDTO> getProductsByPage(int page, int size) {
 
     return products.map(ProductMapper::toDTO);
 }
-public List<ProductDTO> getProductsSorted(String field) {
+public List<ProductDTO> getProductsSorted(String field, String direction) {
 
-    List<Product> products =
-            productRepository.findAll(Sort.by(field));
+    Sort sort = direction.equalsIgnoreCase("desc")
+            ? Sort.by(field).descending()
+            : Sort.by(field).ascending();
+
+    List<Product> products = productRepository.findAll(sort);
 
     return products.stream()
             .map(ProductMapper::toDTO)
@@ -179,6 +181,7 @@ product.setCategory(category);
 public void deleteProduct(Long id) {
     productRepository.deleteById(id);
 }
+
 }
 
 

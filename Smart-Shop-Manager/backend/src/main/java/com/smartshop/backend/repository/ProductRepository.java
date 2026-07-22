@@ -48,4 +48,12 @@ List<ChartDataDTO> getStockChartData();
 """)
 List<ChartDataDTO> getInventoryValueChartData();
 long countByQuantityLessThanEqual(Integer minimumStock);
+@Query("""
+SELECT p FROM Product p
+WHERE
+LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+OR LOWER(p.productCode) LIKE LOWER(CONCAT('%', :keyword, '%'))
+OR LOWER(p.barcode) LIKE LOWER(CONCAT('%', :keyword, '%'))
+""")
+List<Product> searchProducts(@Param("keyword") String keyword);
 }
