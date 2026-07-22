@@ -17,6 +17,9 @@ import com.smartshop.backend.dto.CustomerReportDTO;
 import com.smartshop.backend.entity.Customer;
 import com.smartshop.backend.repository.CustomerRepository;
 import com.smartshop.backend.repository.ProductRepository;
+import com.smartshop.backend.dto.SupplierReportDTO;
+import com.smartshop.backend.entity.Supplier;
+import com.smartshop.backend.repository.SupplierRepository;
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -25,6 +28,7 @@ public class ReportService {
     private final PurchaseRepository purchaseRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
+    private final SupplierRepository supplierRepository;
     
     public List<SalesReportDTO> getSalesReport() {
 
@@ -79,6 +83,13 @@ public List<CustomerReportDTO> getCustomerReport() {
             .map(this::convertCustomerToDTO)
             .toList();
 }
+public List<SupplierReportDTO> getSupplierReport() {
+
+    return supplierRepository.findAll()
+            .stream()
+            .map(this::convertSupplierToDTO)
+            .toList();
+}
 private StockReportDTO convertStockToDTO(Product product) {
 
     StockReportDTO dto = new StockReportDTO();
@@ -103,6 +114,16 @@ private CustomerReportDTO convertCustomerToDTO(Customer customer) {
     dto.setCustomerName(customer.getCustomerName());
     dto.setPhone(customer.getPhone());
     dto.setEmail(customer.getEmail());
+
+    return dto;
+}
+private SupplierReportDTO convertSupplierToDTO(Supplier supplier) {
+
+    SupplierReportDTO dto = new SupplierReportDTO();
+
+    dto.setSupplierName(supplier.getSupplierName());
+    dto.setPhone(supplier.getPhone());
+    dto.setEmail(supplier.getEmail());
 
     return dto;
 }
