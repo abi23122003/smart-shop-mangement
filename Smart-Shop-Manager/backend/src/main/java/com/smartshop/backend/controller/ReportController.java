@@ -14,7 +14,7 @@ import com.smartshop.backend.dto.StockReportDTO;
 import com.smartshop.backend.service.ReportService;
 import com.smartshop.backend.dto.CustomerReportDTO;
 import com.smartshop.backend.dto.SupplierReportDTO;
-
+import com.smartshop.backend.dto.ProfitReportDTO;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -48,5 +48,9 @@ public List<CustomerReportDTO> getCustomerReport() {
 @GetMapping("/suppliers")
 public List<SupplierReportDTO> getSupplierReport() {
     return reportService.getSupplierReport();
+}
+@GetMapping("/profit")
+public ProfitReportDTO getProfitReport() {
+    return reportService.getProfitReport();
 }
 }

@@ -20,6 +20,7 @@ import com.smartshop.backend.repository.ProductRepository;
 import com.smartshop.backend.dto.SupplierReportDTO;
 import com.smartshop.backend.entity.Supplier;
 import com.smartshop.backend.repository.SupplierRepository;
+import com.smartshop.backend.dto.ProfitReportDTO;
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -89,6 +90,26 @@ public List<SupplierReportDTO> getSupplierReport() {
             .stream()
             .map(this::convertSupplierToDTO)
             .toList();
+}
+public ProfitReportDTO getProfitReport() {
+
+    Double totalSales = saleRepository.findAll()
+            .stream()
+            .mapToDouble(Sale::getTotalAmount)
+            .sum();
+
+    Double totalPurchases = purchaseRepository.findAll()
+            .stream()
+            .mapToDouble(Purchase::getTotalAmount)
+            .sum();
+
+    ProfitReportDTO dto = new ProfitReportDTO();
+
+    dto.setTotalSales(totalSales);
+    dto.setTotalPurchases(totalPurchases);
+    dto.setTotalProfit(totalSales - totalPurchases);
+
+    return dto;
 }
 private StockReportDTO convertStockToDTO(Product product) {
 
