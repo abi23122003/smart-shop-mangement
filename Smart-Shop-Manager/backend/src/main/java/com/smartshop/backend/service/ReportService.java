@@ -12,6 +12,10 @@ import com.smartshop.backend.entity.Purchase;
 import com.smartshop.backend.entity.Product;
 import com.smartshop.backend.repository.PurchaseRepository;
 import com.smartshop.backend.dto.ProductReportDTO;
+import com.smartshop.backend.dto.StockReportDTO;
+import com.smartshop.backend.dto.CustomerReportDTO;
+import com.smartshop.backend.entity.Customer;
+import com.smartshop.backend.repository.CustomerRepository;
 import com.smartshop.backend.repository.ProductRepository;
 @Service
 @RequiredArgsConstructor
@@ -20,7 +24,8 @@ public class ReportService {
     private final SaleRepository saleRepository;
     private final PurchaseRepository purchaseRepository;
     private final ProductRepository productRepository;
-
+    private final CustomerRepository customerRepository;
+    
     public List<SalesReportDTO> getSalesReport() {
 
     return saleRepository.findAll()
@@ -59,7 +64,50 @@ public List<ProductReportDTO> getProductReport() {
             .map(this::convertProductToDTO)
             .toList();
 }
+
+public List<StockReportDTO> getStockReport() {
+
+    return productRepository.findAll()
+            .stream()
+            .map(this::convertStockToDTO)
+            .toList();
+}
+public List<CustomerReportDTO> getCustomerReport() {
+
+    return customerRepository.findAll()
+            .stream()
+            .map(this::convertCustomerToDTO)
+            .toList();
+}
+private StockReportDTO convertStockToDTO(Product product) {
+
+    StockReportDTO dto = new StockReportDTO();
+
+    dto.setProductCode(product.getProductCode());
+    dto.setProductName(product.getProductName());
+    dto.setQuantity(product.getQuantity());
+    dto.setMinimumStock(product.getMinimumStock());
+
+    if (product.getQuantity() <= product.getMinimumStock()) {
+        dto.setStockStatus("Low Stock");
+    } else {
+        dto.setStockStatus("In Stock");
+    }
+
+    return dto;
+}
+private CustomerReportDTO convertCustomerToDTO(Customer customer) {
+
+    CustomerReportDTO dto = new CustomerReportDTO();
+
+    dto.setCustomerName(customer.getCustomerName());
+    dto.setPhone(customer.getPhone());
+    dto.setEmail(customer.getEmail());
+
+    return dto;
+}
 private ProductReportDTO convertProductToDTO(Product product) {
+    
 
     ProductReportDTO dto = new ProductReportDTO();
 
