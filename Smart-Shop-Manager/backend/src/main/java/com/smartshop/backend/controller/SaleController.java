@@ -10,13 +10,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 import com.smartshop.backend.dto.SaleDTO;
 import com.smartshop.backend.pdf.InvoiceService;
 import com.smartshop.backend.service.SaleService;
 
 @RestController
 @RequestMapping("/api/sales")
-@CrossOrigin(origins = "*")
 public class SaleController {
 
     private final SaleService saleService;
@@ -32,7 +33,7 @@ public class SaleController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SaleDTO createSale(@RequestBody SaleDTO saleDTO) {
+    public SaleDTO createSale(@Valid @RequestBody SaleDTO saleDTO) {
         return saleService.saveSale(saleDTO);
     }
 

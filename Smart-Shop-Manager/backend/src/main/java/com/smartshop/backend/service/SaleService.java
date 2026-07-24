@@ -15,7 +15,6 @@ import com.smartshop.backend.entity.SaleItem;
 import com.smartshop.backend.mapper.SaleMapper;
 import com.smartshop.backend.repository.CustomerRepository;
 import com.smartshop.backend.repository.ProductRepository;
-import com.smartshop.backend.repository.SaleItemRepository;
 import com.smartshop.backend.repository.SaleRepository;
 
 
@@ -23,18 +22,15 @@ import com.smartshop.backend.repository.SaleRepository;
 public class SaleService {
 
     private final SaleRepository saleRepository;
-    private final SaleItemRepository saleItemRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
 
     public SaleService(
             SaleRepository saleRepository,
-            SaleItemRepository saleItemRepository,
             CustomerRepository customerRepository,
             ProductRepository productRepository) {
 
         this.saleRepository = saleRepository;
-        this.saleItemRepository = saleItemRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
     }
@@ -110,6 +106,12 @@ public void deleteSale(Long id) {
 
     Sale sale = saleRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Sale not found"));
+
+    for (SaleItem saleItem : sale.getSaleItems()) {
+        Product product = saleItem.getProduct();
+        product.setQuantity(product.getQuantity() + saleItem.getQuantity());
+        productRepository.save(product);
+    }
 
     saleRepository.delete(sale);
 }

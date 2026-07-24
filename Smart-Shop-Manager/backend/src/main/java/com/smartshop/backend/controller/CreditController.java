@@ -8,7 +8,6 @@ import com.smartshop.backend.dto.CreditTransactionDTO;
 
 @RestController
 @RequestMapping("/api/credits")
-@CrossOrigin(origins = "*")
 public class CreditController {
 
     private final CreditService creditService;

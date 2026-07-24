@@ -15,25 +15,21 @@ import com.smartshop.backend.entity.PurchaseItem;
 import com.smartshop.backend.entity.Supplier;
 import com.smartshop.backend.mapper.PurchaseMapper;
 import com.smartshop.backend.repository.ProductRepository;
-import com.smartshop.backend.repository.PurchaseItemRepository;
 import com.smartshop.backend.repository.PurchaseRepository;
 import com.smartshop.backend.repository.SupplierRepository;
 @Service
 public class PurchaseService {
 
 private final PurchaseRepository purchaseRepository;
-private final PurchaseItemRepository purchaseItemRepository;
 private final SupplierRepository supplierRepository;
 private final ProductRepository productRepository;
 
 public PurchaseService(
         PurchaseRepository purchaseRepository,
-        PurchaseItemRepository purchaseItemRepository,
         SupplierRepository supplierRepository,
         ProductRepository productRepository) {
 
     this.purchaseRepository = purchaseRepository;
-    this.purchaseItemRepository = purchaseItemRepository;
     this.supplierRepository = supplierRepository;
     this.productRepository = productRepository;
 }

@@ -1,0 +1,27 @@
+import { useCallback, useEffect, useState } from "react";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/Delete";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import SearchIcon from "@mui/icons-material/Search";
+import { Alert, Box, Button, Chip, CircularProgress, IconButton, InputAdornment, Pagination, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import ProductFormDialog from "../modules/products/components/ProductFormDialog";
+import { createProduct, deleteProduct, getCategories, getProductPage, searchProducts, updateProduct } from "../modules/products/services/productService";
+
+const PAGE_SIZE = 10;
+const errorMessage = (error) => error.response?.data?.message ?? "The product request could not be completed.";
+const stockStatus = (product) => product.quantity === 0 ? ["Out of stock", "error"] : product.quantity <= product.minimumStock ? ["Low stock", "warning"] : ["In stock", "success"];
+
+export default function ProductPage() {
+  const [products, setProducts] = useState([]); const [categories, setCategories] = useState([]); const [page, setPage] = useState(0); const [totalPages, setTotalPages] = useState(1); const [search, setSearch] = useState(""); const [loading, setLoading] = useState(true); const [error, setError] = useState(""); const [dialog, setDialog] = useState(false); const [selected, setSelected] = useState(null); const [saving, setSaving] = useState(false);
+  const load = useCallback(async (targetPage = page, keyword = search) => { setLoading(true); try { setError(""); if (keyword.trim()) { const matches = await searchProducts(keyword.trim()); setProducts(matches.slice(targetPage * PAGE_SIZE, (targetPage + 1) * PAGE_SIZE)); setTotalPages(Math.max(1, Math.ceil(matches.length / PAGE_SIZE))); } else { const result = await getProductPage(targetPage, PAGE_SIZE); setProducts(result.content); setTotalPages(Math.max(1, result.totalPages)); } } catch (requestError) { setError(errorMessage(requestError)); } finally { setLoading(false); } }, [page, search]);
+  useEffect(() => { getCategories().then(setCategories).catch(() => setError("Categories could not be loaded. Add or restore a category before saving a product.")); }, []);
+  useEffect(() => { const timer = setTimeout(load, 0); return () => clearTimeout(timer); }, [load]);
+  function changeSearch(value) { setSearch(value); setPage(0); }
+  async function save(product) { setSaving(true); try { if (selected) await updateProduct(selected.id, product); else await createProduct(product); setDialog(false); await load(0, search); setPage(0); } catch (requestError) { setError(errorMessage(requestError)); } finally { setSaving(false); } }
+  async function remove(id) { if (!window.confirm("Delete this product? This cannot be undone.")) return; try { await deleteProduct(id); await load(); } catch (requestError) { setError(errorMessage(requestError)); } }
+  return <Stack spacing={3}><Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between" }}><Box><Typography variant="h4">Products</Typography><Typography color="text.secondary">Manage inventory, pricing, and stock levels.</Typography></Box><Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={() => { setSelected(null); setDialog(true); }}>Add product</Button></Stack>
+    {error && <Alert severity="error" onClose={() => setError("")}>{error}</Alert>}<TextField label="Search by name, code, or barcode" value={search} onChange={(e) => changeSearch(e.target.value)} slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }} />
+    <Paper sx={{ overflowX: "auto" }}><Table><TableHead><TableRow><TableCell>Product</TableCell><TableCell>Barcode</TableCell><TableCell>Stock</TableCell><TableCell>Status</TableCell><TableCell>Price</TableCell><TableCell align="right">Actions</TableCell></TableRow></TableHead><TableBody>{loading ? <TableRow><TableCell colSpan={6} align="center"><CircularProgress size={24} /></TableCell></TableRow> : products.map((product) => { const [label, color] = stockStatus(product); return <TableRow key={product.id} hover><TableCell><Typography fontWeight={600}>{product.productName}</Typography><Typography variant="body2" color="text.secondary">{product.productCode} · {product.brand || "No brand"}</Typography></TableCell><TableCell>{product.barcode}</TableCell><TableCell>{product.quantity} {product.unit}</TableCell><TableCell><Chip label={label} color={color} size="small" /></TableCell><TableCell>₹{product.sellingPrice ?? 0}</TableCell><TableCell align="right"><IconButton aria-label="Edit product" onClick={() => { setSelected(product); setDialog(true); }}><EditOutlinedIcon /></IconButton><IconButton aria-label="Delete product" color="error" onClick={() => remove(product.id)}><DeleteOutlineIcon /></IconButton></TableCell></TableRow>; })}{!loading && !products.length && <TableRow><TableCell colSpan={6} align="center">No products found.</TableCell></TableRow>}</TableBody></Table></Paper>
+    <Box sx={{ display: "flex", justifyContent: "center" }}><Pagination count={totalPages} page={page + 1} onChange={(_, value) => setPage(value - 1)} color="primary" /></Box>{dialog && <ProductFormDialog key={selected?.id ?? "new"} open={dialog} product={selected} categories={categories} saving={saving} onClose={() => setDialog(false)} onSubmit={save} />}
+  </Stack>;
+}
