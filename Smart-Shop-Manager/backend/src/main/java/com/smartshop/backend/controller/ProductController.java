@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.dto.ProductDTO;
+import com.smartshop.backend.dto.ProductRestockRequest;
 import com.smartshop.backend.dto.ProductStatisticsDTO;
 import com.smartshop.backend.service.ProductService;
 
@@ -32,6 +33,10 @@ public class ProductController {
  @PostMapping
    public ProductDTO saveProduct(@Valid @RequestBody ProductDTO productDTO) {
     return productService.saveProduct(productDTO);
+}
+@PostMapping("/restock")
+public ProductDTO restockProduct(@Valid @RequestBody ProductRestockRequest request) {
+    return productService.restockProduct(request);
 }
 @GetMapping
 public List<ProductDTO> getAllProducts() {

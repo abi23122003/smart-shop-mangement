@@ -56,9 +56,10 @@ public PurchaseDTO savePurchase(PurchaseDTO purchaseDTO) {
         Product product = productRepository.findById(itemDTO.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
                 // Update Product Stock
-product.setQuantity(
+        product.setQuantity(
         product.getQuantity() + itemDTO.getQuantity()
 );
+        product.setPurchasePrice(itemDTO.getPurchasePrice());
 
 // Save Updated Product
 productRepository.save(product);

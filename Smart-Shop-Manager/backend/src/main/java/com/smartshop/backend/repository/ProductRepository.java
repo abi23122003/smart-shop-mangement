@@ -2,6 +2,7 @@ package com.smartshop.backend.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.entity.Product;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+Optional<Product> findByBarcode(String barcode);
 List<Product> findByProductNameContainingIgnoreCase(String keyword);
 Page<Product> findByProductNameContainingIgnoreCase(
         String keyword,

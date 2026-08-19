@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.smartshop.backend.repository.CategoryRepository;
 import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.dto.ProductDTO;
+import com.smartshop.backend.dto.ProductRestockRequest;
 import com.smartshop.backend.dto.ProductStatisticsDTO;
 import com.smartshop.backend.entity.Product;
 import com.smartshop.backend.mapper.ProductMapper;
@@ -44,6 +45,17 @@ public List<ProductDTO> getAllProducts() {
     return products.stream()
             .map(ProductMapper::toDTO)
             .toList();
+}
+
+public ProductDTO restockProduct(ProductRestockRequest request) {
+    String barcode = request.getBarcode().trim();
+    Product product = productRepository.findByBarcode(barcode)
+            .orElseThrow(() -> new RuntimeException("No product found for barcode: " + barcode));
+
+    int currentQuantity = product.getQuantity() == null ? 0 : product.getQuantity();
+    product.setQuantity(currentQuantity + request.getQuantity());
+
+    return ProductMapper.toDTO(productRepository.save(product));
 }
 
 public List<ProductDTO> searchProducts(String keyword) {
