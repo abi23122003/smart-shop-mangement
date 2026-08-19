@@ -2,20 +2,22 @@ package com.smartshop.backend.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import com.smartshop.backend.entity.Category;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import com.smartshop.backend.repository.CategoryRepository;
+
 import com.smartshop.backend.dto.ChartDataDTO;
 import com.smartshop.backend.dto.ProductDTO;
 import com.smartshop.backend.dto.ProductRestockRequest;
 import com.smartshop.backend.dto.ProductStatisticsDTO;
+import com.smartshop.backend.entity.Category;
 import com.smartshop.backend.entity.Product;
 import com.smartshop.backend.mapper.ProductMapper;
+import com.smartshop.backend.repository.CategoryRepository;
 import com.smartshop.backend.repository.ProductRepository;
 
 @Service
