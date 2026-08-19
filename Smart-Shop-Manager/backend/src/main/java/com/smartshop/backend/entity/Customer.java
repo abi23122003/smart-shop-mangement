@@ -34,5 +34,7 @@ public class Customer {
 
     private Double creditLimit;
 
+    private Boolean creditEnabled;
+
     private Boolean active;
 }

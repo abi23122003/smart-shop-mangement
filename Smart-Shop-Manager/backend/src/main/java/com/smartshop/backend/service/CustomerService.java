@@ -1,16 +1,18 @@
 package com.smartshop.backend.service;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
 import com.smartshop.backend.dto.CustomerDTO;
+import com.smartshop.backend.dto.CustomerStatisticsDTO;
 import com.smartshop.backend.entity.Customer;
 import com.smartshop.backend.mapper.CustomerMapper;
 import com.smartshop.backend.repository.CustomerRepository;
-import com.smartshop.backend.dto.CustomerStatisticsDTO;
 @Service
 public class CustomerService {
 
@@ -24,6 +26,9 @@ public class CustomerService {
     public CustomerDTO saveCustomer(CustomerDTO customerDTO) {
 
         Customer customer = CustomerMapper.toEntity(customerDTO);
+        if (customerDTO.getActive() == null) {
+            customer.setActive(Boolean.TRUE);
+        }
 
         Customer savedCustomer = customerRepository.save(customer);
 
@@ -58,7 +63,10 @@ public CustomerDTO updateCustomer(Long id, CustomerDTO customerDTO) {
     customer.setEmail(customerDTO.getEmail());
     customer.setAddress(customerDTO.getAddress());
     customer.setCreditLimit(customerDTO.getCreditLimit());
-    customer.setActive(customerDTO.getActive());
+    customer.setCreditEnabled(customerDTO.getCreditEnabled());
+    if (customerDTO.getActive() != null) {
+        customer.setActive(customerDTO.getActive());
+    }
 
     Customer updatedCustomer = customerRepository.save(customer);
 

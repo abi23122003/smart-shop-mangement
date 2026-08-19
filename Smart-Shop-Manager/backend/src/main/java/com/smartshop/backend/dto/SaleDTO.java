@@ -24,8 +24,9 @@ public class SaleDTO {
     @NotNull(message = "Sale date is required")
     private LocalDate saleDate;
 
-    @NotNull(message = "Customer ID is required")
     private Long customerId;
+
+    private String paymentMethod;
 
     private Double totalAmount;
 

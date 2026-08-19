@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import com.smartshop.backend.dto.SaleDTO;
 import com.smartshop.backend.dto.SaleItemDTO;
 import com.smartshop.backend.entity.Customer;
-import com.smartshop.backend.entity.Product;
 import com.smartshop.backend.entity.Sale;
 import com.smartshop.backend.entity.SaleItem;
 
@@ -23,6 +22,7 @@ public class SaleMapper {
         sale.setId(dto.getId());
         sale.setSaleCode(dto.getSaleCode());
         sale.setSaleDate(dto.getSaleDate());
+        sale.setPaymentMethod(dto.getPaymentMethod());
         sale.setTotalAmount(dto.getTotalAmount());
 
         if (dto.getCustomerId() != null) {
@@ -45,6 +45,7 @@ public class SaleMapper {
         dto.setId(sale.getId());
         dto.setSaleCode(sale.getSaleCode());
         dto.setSaleDate(sale.getSaleDate());
+        dto.setPaymentMethod(sale.getPaymentMethod());
         dto.setTotalAmount(sale.getTotalAmount());
 
         if (sale.getCustomer() != null) {

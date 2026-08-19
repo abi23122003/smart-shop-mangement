@@ -17,6 +17,7 @@ public class CustomerMapper {
         customer.setEmail(dto.getEmail());
         customer.setAddress(dto.getAddress());
         customer.setCreditLimit(dto.getCreditLimit());
+        customer.setCreditEnabled(dto.getCreditEnabled());
         customer.setActive(dto.getActive());
 
         return customer;
@@ -34,6 +35,7 @@ public class CustomerMapper {
         dto.setEmail(customer.getEmail());
         dto.setAddress(customer.getAddress());
         dto.setCreditLimit(customer.getCreditLimit());
+        dto.setCreditEnabled(customer.getCreditEnabled());
         dto.setActive(customer.getActive());
 
         return dto;
