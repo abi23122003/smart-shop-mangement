@@ -23,6 +23,8 @@ export default function ProductPage() {
     if (!scannerOpen) return undefined;
     let scanner;
     let startTimer;
+    let started = false;
+    let cancelled = false;
     setCameraError("");
     const startCamera = async () => {
       try {
@@ -38,15 +40,27 @@ export default function ProductPage() {
           (decodedText) => handleScannedBarcode(decodedText),
           () => {},
         );
+        started = true;
+        if (cancelled) {
+          await scanner.stop();
+          started = false;
+        }
       } catch {
-        setCameraError("Camera could not start. Allow camera access or enter the barcode below.");
+        if (!cancelled) {
+          setCameraError("Camera could not start. Allow camera access or enter the barcode below.");
+        }
       }
     };
     startTimer = window.setTimeout(startCamera, 150);
     return () => {
+      cancelled = true;
       window.clearTimeout(startTimer);
-      if (scanner) {
-        scanner.stop().catch(() => {}).finally(() => scanner.clear());
+      if (scanner && started) {
+        scanner.stop()
+          .then(() => {
+            started = false;
+          })
+          .catch(() => {});
       }
     };
   }, [scannerOpen]);
