@@ -15,7 +15,7 @@ export default function AppNavbar({ onMenuClick }) {
   const [notificationAnchor, setNotificationAnchor] = useState(null);
   function handleLogout() { logout(); navigate(paths.login, { replace: true }); }
   return <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, borderBottom: 0 }}>
-    <Toolbar sx={{ minHeight: 72, gap: 1.5 }}><IconButton color="inherit" onClick={onMenuClick} sx={{ display: { md: "none" }, mr: 0.5 }} aria-label="Open navigation"><MenuIcon /></IconButton><StorefrontIcon sx={{ mr: 0.5 }} /><Typography variant="h6" sx={{ flexGrow: 1, display: { xs: "none", sm: "block" }, fontWeight: 700, letterSpacing: "0.02em" }}>Smart Shop Manager</Typography>
+    <Toolbar sx={{ minHeight: 72, gap: 1.5 }}><IconButton color="inherit" onClick={onMenuClick} sx={{ display: { md: "none" }, mr: 0.5 }} aria-label="Open navigation"><MenuIcon /></IconButton><StorefrontIcon sx={{ mr: 0.5 }} /><Typography variant="h6" sx={{ flexGrow: 1, display: { xs: "none", sm: "block" }, fontWeight: 700, letterSpacing: "0.02em" }}>Sutharsan Store</Typography>
       <Tooltip title="Notifications"><IconButton color="inherit" aria-label="Notifications" onClick={(event) => setNotificationAnchor(event.currentTarget)}><Badge variant="dot" color="error"><NotificationsNoneOutlinedIcon /></Badge></IconButton></Tooltip>
       <Tooltip title="Account menu"><IconButton color="inherit" aria-label="Account menu" onClick={(event) => setUserMenuAnchor(event.currentTarget)}><AccountCircleOutlinedIcon /></IconButton></Tooltip>
       <Menu anchorEl={notificationAnchor} open={Boolean(notificationAnchor)} onClose={() => setNotificationAnchor(null)}><MenuItem disabled>No new notifications</MenuItem></Menu>

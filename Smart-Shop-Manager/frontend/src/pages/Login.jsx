@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Box, Button, Divider, Paper, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import { paths } from "../routes/paths";
@@ -27,16 +27,7 @@ export default function Login() {
     <Paper component="form" onSubmit={handleSubmit} sx={{ width: "100%", maxWidth: 980, overflow: "hidden", display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.05fr 0.95fr" } }}>
       <Box sx={{ p: { xs: 3, sm: 4, md: 5 }, color: "common.white", backgroundImage: "linear-gradient(145deg, #0f172a, #1d4ed8 60%, #0f766e)", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: { md: 520 } }}>
         <Box>
-          <Typography variant="overline" sx={{ letterSpacing: 3, opacity: 0.8 }}>SMART SHOP MANAGER</Typography>
-          <Typography variant="h3" sx={{ mt: 2, fontWeight: 800, lineHeight: 1.05 }}>Run your shop from a single dashboard.</Typography>
-          <Typography sx={{ mt: 2, maxWidth: 420, color: "rgba(255,255,255,0.85)" }}>Track inventory, customers, sales, and reports in one place without losing the details that matter.</Typography>
-        </Box>
-        <Box sx={{ mt: 4 }}>
-          <Stack direction="row" spacing={3} divider={<Divider flexItem orientation="vertical" sx={{ borderColor: "rgba(255,255,255,0.18)" }} />}>
-            <Box><Typography variant="h5" sx={{ fontWeight: 800 }}>6</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,0.72)" }}>core modules</Typography></Box>
-            <Box><Typography variant="h5" sx={{ fontWeight: 800 }}>1</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,0.72)" }}>unified workflow</Typography></Box>
-            <Box><Typography variant="h5" sx={{ fontWeight: 800 }}>JWT</Typography><Typography variant="body2" sx={{ color: "rgba(255,255,255,0.72)" }}>secured session</Typography></Box>
-          </Stack>
+          <Typography variant="overline" sx={{ letterSpacing: 3, opacity: 0.8 }}>SUTHARSAN STORE</Typography>
         </Box>
       </Box>
       <Box sx={{ p: { xs: 3, sm: 4, md: 5 }, display: "flex", alignItems: "center" }}>
