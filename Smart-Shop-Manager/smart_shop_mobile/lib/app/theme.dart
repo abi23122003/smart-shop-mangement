@@ -35,6 +35,14 @@ abstract final class AppTheme {
           ),
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        height: 72,
+        labelTextStyle: WidgetStatePropertyAll(TextStyle(fontWeight: FontWeight.w600)),
+      ),
+      navigationRailTheme: const NavigationRailThemeData(
+        minWidth: 88,
+        groupAlignment: -0.8,
+      ),
     );
   }
 }

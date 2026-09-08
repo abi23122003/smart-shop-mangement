@@ -24,6 +24,7 @@ class _SalePageState extends State<SalePage> {
   List<CustomerModel> _customers = const [];
   List<ProductModel> _products = const [];
   final Map<int, int> _cart = {};
+  final Map<int, ProductModel> _cartProducts = {};
   int? _customerId;
   String _paymentMethod = 'Cash';
   bool _loading = true;
@@ -80,12 +81,12 @@ class _SalePageState extends State<SalePage> {
     setState(() { _saving = true; _error = null; });
     try {
       final items = _cart.entries.map((entry) {
-        final product = _products.firstWhere((item) => item.id == entry.key);
+        final product = _cartProducts[entry.key]!;
         return {'productId': product.id, 'quantity': entry.value, 'sellingPrice': product.sellingPrice ?? 0};
       }).toList();
       final sale = await _repository.create(customerId: _customerId!, paymentMethod: _paymentMethod, items: items);
       if (mounted) {
-        setState(() { _cart.clear(); _products = []; _searchController.clear(); });
+        setState(() { _cart.clear(); _cartProducts.clear(); _products = []; _searchController.clear(); });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sale ${sale['saleCode'] ?? ''} completed successfully.')));
       }
     } on AppException catch (exception) {
@@ -125,7 +126,10 @@ class _SalePageState extends State<SalePage> {
                     subtitle: Text('Stock ${product.quantity} - INR ${(product.sellingPrice ?? 0).toStringAsFixed(2)}'),
                     trailing: IconButton(
                       onPressed: product.quantity > 0 && product.id != null
-                          ? () => setState(() => _cart[product.id!] = (_cart[product.id!] ?? 0) + 1)
+                          ? () => setState(() {
+                              _cart[product.id!] = (_cart[product.id!] ?? 0) + 1;
+                              _cartProducts[product.id!] = product;
+                            })
                           : null,
                       icon: const Icon(Icons.add),
                     ),
@@ -148,7 +152,7 @@ class _SalePageState extends State<SalePage> {
   }
 
   Widget _cartRow(MapEntry<int, int> entry) {
-    final product = _products.where((item) => item.id == entry.key).firstOrNull;
-    return ListTile(title: Text(product?.name ?? 'Product #${entry.key}'), subtitle: Text('Quantity: ${entry.value}'), trailing: IconButton(onPressed: () => setState(() => _cart.remove(entry.key)), icon: const Icon(Icons.delete_outline)));
+    final product = _cartProducts[entry.key];
+    return ListTile(title: Text(product?.name ?? 'Product #${entry.key}'), subtitle: Text('Quantity: ${entry.value}'), trailing: IconButton(onPressed: () => setState(() { _cart.remove(entry.key); _cartProducts.remove(entry.key); }), icon: const Icon(Icons.delete_outline)));
   }
 }

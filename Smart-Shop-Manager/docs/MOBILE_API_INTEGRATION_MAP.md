@@ -200,3 +200,11 @@ Reports have no date-range query parameters. The mobile app must not pretend tha
 ## Phase 0 Decision
 
 The existing APIs are sufficient to begin Flutter foundation, authentication, navigation, dashboard, products, customers, credits, suppliers, purchases, sales, receipts, and basic reports. Do not modify the backend for the initial mobile implementation. Revisit the listed gaps only when a required mobile workflow cannot be completed with the verified contracts.
+
+## Phase 19 Decision
+
+The first mobile release is online-only. Flutter does not queue transactions or treat local mutable data as authoritative. When the API is unavailable, the app shows a retryable network error. See [MOBILE_RUNTIME_POLICY.md](MOBILE_RUNTIME_POLICY.md) for device URL configuration and the criteria for reconsidering offline synchronization.
+
+## Phase 20 Decision
+
+Flutter security controls are in place, but production release is gated on externalizing and rotating the backend JWT and database secrets and using an HTTPS API URL. See [MOBILE_SECURITY_REVIEW.md](MOBILE_SECURITY_REVIEW.md).

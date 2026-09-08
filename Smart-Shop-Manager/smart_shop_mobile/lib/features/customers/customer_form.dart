@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'customer_model.dart';
+import '../../core/validation/validators.dart';
 
 Future<CustomerModel?> showCustomerForm(BuildContext context) async {
   final formKey = GlobalKey<FormState>();
@@ -14,9 +15,9 @@ Future<CustomerModel?> showCustomerForm(BuildContext context) async {
       content: Form(
         key: formKey,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextFormField(controller: name, decoration: const InputDecoration(labelText: 'Name'), validator: (value) => value == null || value.trim().isEmpty ? 'Required' : null),
-          TextFormField(controller: phone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Phone'), validator: (value) => value == null || !RegExp(r'^\d{10}$').hasMatch(value) ? 'Enter 10 digits' : null),
-          TextFormField(controller: creditLimit, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Credit limit'), validator: (value) => double.tryParse(value ?? '') == null ? 'Enter a number' : null),
+          TextFormField(controller: name, decoration: const InputDecoration(labelText: 'Name'), validator: (value) => Validators.required(value, field: 'Name')),
+          TextFormField(controller: phone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Phone'), validator: Validators.phone),
+          TextFormField(controller: creditLimit, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Credit limit'), validator: (value) => Validators.positiveNumber(value, allowZero: true)),
         ]),
       ),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')), FilledButton(onPressed: () { if (formKey.currentState!.validate()) Navigator.pop(context, CustomerModel(name: name.text.trim(), phone: phone.text.trim(), creditLimit: double.parse(creditLimit.text), creditEnabled: true)); }, child: const Text('Save'))],

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/auth/auth_controller.dart';
+import '../../core/validation/validators.dart';
 import '../../core/widgets/app_state_widgets.dart';
 
 class LoginPage extends StatefulWidget {
@@ -65,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _usernameController,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person_outline)),
-                      validator: (value) => value == null || value.trim().isEmpty ? 'Enter your username' : null,
+                      validator: (value) => Validators.required(value, field: 'Username'),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -81,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                           icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                         ),
                       ),
-                      validator: (value) => value == null || value.isEmpty ? 'Enter your password' : null,
+                      validator: (value) => Validators.required(value, field: 'Password'),
                     ),
                     const SizedBox(height: 24),
                     FilledButton.icon(

@@ -1,4 +1,5 @@
 import '../../core/api/api_client.dart';
+import '../../core/constants/app_constants.dart';
 import 'product_model.dart';
 
 class ProductRepository {
@@ -12,7 +13,7 @@ class ProductRepository {
       ...?categoryId == null ? null : {'categoryId': categoryId},
       'stockStatus': stockStatus,
       'page': 0,
-      'size': 50,
+      'size': AppConstants.defaultPageSize,
       'sort': 'productName',
       'direction': 'asc',
     });

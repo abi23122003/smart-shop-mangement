@@ -5,5 +5,6 @@ abstract final class AppConstants {
     defaultValue: defaultApiBaseUrl,
   );
   static const requestTimeout = Duration(seconds: 20);
+  static const defaultPageSize = 20;
   static const tokenStorageKey = 'smart_shop_access_token';
 }

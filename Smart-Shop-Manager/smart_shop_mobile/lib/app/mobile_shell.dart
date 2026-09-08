@@ -18,28 +18,47 @@ class MobileShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     final selected = destinations.indexWhere((item) => location.startsWith(item.$2));
+    final selectedIndex = selected < 0 ? 0 : selected;
+    final showQuickSale = location != '/sales' && location != '/sales/new';
     return Scaffold(
       appBar: AppBar(title: const Text('Sutharsan Store')),
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selected < 0 ? 0 : selected,
-        onDestinationSelected: (index) {
-          if (index == destinations.length - 1) {
-            showModalBottomSheet<void>(context: context, builder: (_) => const MoreSheet());
-          } else {
-            context.go(destinations[index].$2);
-          }
-        },
-        destinations: [
-          for (final item in destinations) NavigationDestination(icon: Icon(item.$3), label: item.$1),
-        ],
+      body: SafeArea(
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: FocusManager.instance.primaryFocus?.unfocus,
+          child: LayoutBuilder(
+            builder: (context, constraints) => constraints.maxWidth >= 800
+                ? Row(children: [
+                    _rail(context, selectedIndex),
+                    const VerticalDivider(width: 1),
+                    Expanded(child: child),
+                  ])
+                : child,
+          ),
+        ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/sales/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('New sale'),
-      ),
+      bottomNavigationBar: MediaQuery.sizeOf(context).width < 800 ? NavigationBar(
+        selectedIndex: selectedIndex,
+        onDestinationSelected: (index) => _navigate(context, index),
+        destinations: [for (final item in destinations) NavigationDestination(icon: Icon(item.$3), label: item.$1)],
+      ) : null,
+      floatingActionButton: showQuickSale ? FloatingActionButton.extended(onPressed: () => context.go('/sales/new'), icon: const Icon(Icons.add), label: const Text('New sale')) : null,
     );
+  }
+
+  Widget _rail(BuildContext context, int selectedIndex) => NavigationRail(
+        selectedIndex: selectedIndex,
+        labelType: NavigationRailLabelType.all,
+        onDestinationSelected: (index) => _navigate(context, index),
+        destinations: [for (final item in destinations) NavigationRailDestination(icon: Icon(item.$3), label: Text(item.$1))],
+      );
+
+  void _navigate(BuildContext context, int index) {
+    if (index == destinations.length - 1) {
+      showModalBottomSheet<void>(context: context, builder: (_) => const MoreSheet());
+    } else {
+      context.go(destinations[index].$2);
+    }
   }
 }
 

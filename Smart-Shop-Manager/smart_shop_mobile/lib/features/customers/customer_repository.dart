@@ -1,4 +1,5 @@
 import '../../core/api/api_client.dart';
+import '../../core/constants/app_constants.dart';
 import 'credit_model.dart';
 import 'customer_model.dart';
 
@@ -8,9 +9,13 @@ class CustomerRepository {
   final ApiClient _apiClient;
 
   Future<List<CustomerModel>> list({String keyword = ''}) async {
-    final path = keyword.trim().isEmpty ? '/customers' : '/customers/search';
-    final response = await _apiClient.get<List<dynamic>>(path, queryParameters: keyword.trim().isEmpty ? null : {'keyword': keyword.trim()});
-    return (response.data ?? const []).whereType<Map<String, dynamic>>().map(CustomerModel.fromJson).toList();
+    if (keyword.trim().isNotEmpty) {
+      final response = await _apiClient.get<List<dynamic>>('/customers/search', queryParameters: {'keyword': keyword.trim()});
+      return (response.data ?? const []).whereType<Map<String, dynamic>>().map(CustomerModel.fromJson).toList();
+    }
+    final response = await _apiClient.get<Map<String, dynamic>>('/customers/page', queryParameters: {'page': 0, 'size': AppConstants.defaultPageSize});
+    final content = response.data?['content'];
+    return content is List ? content.whereType<Map<String, dynamic>>().map(CustomerModel.fromJson).toList() : const [];
   }
 
   Future<CustomerModel> create(CustomerModel customer) async {

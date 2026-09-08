@@ -33,9 +33,20 @@ sealed class AppException implements Exception {
   }
 
   static String? _messageFromResponse(Object? data) {
-    if (data is Map<String, dynamic>) {
+    if (data is Map) {
       final message = data['message'] ?? data['error'];
       if (message is String && message.trim().isNotEmpty) return message;
+      final errors = data['errors'];
+      if (errors is Map) {
+        final messages = errors.entries
+            .map((entry) => '${entry.key}: ${entry.value}')
+            .join('\n');
+        if (messages.isNotEmpty) return messages;
+      }
+      if (errors is List) {
+        final messages = errors.whereType<String>().join('\n');
+        if (messages.isNotEmpty) return messages;
+      }
     }
     if (data is String && data.trim().isNotEmpty) return data;
     return null;
