@@ -3,9 +3,6 @@ export const paths = {
   dashboard: "/dashboard",
   products: "/products",
   customers: "/customers",
-  suppliers: "/suppliers",
-  purchases: "/purchases",
   sales: "/sales",
   reports: "/reports",
-  settings: "/settings",
 };

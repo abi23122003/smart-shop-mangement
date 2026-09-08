@@ -15,6 +15,7 @@ public class ProductMapper {
         product.setBarcode(dto.getBarcode());
         product.setProductName(dto.getProductName());
         product.setBrand(dto.getBrand());
+        product.setSubcategory(dto.getSubcategory());
         product.setVariant(dto.getVariant());
         product.setUnit(dto.getUnit());
         product.setQuantity(dto.getQuantity());
@@ -38,6 +39,7 @@ public class ProductMapper {
     dto.setBarcode(product.getBarcode());
     dto.setProductName(product.getProductName());
     dto.setBrand(product.getBrand());
+    dto.setSubcategory(product.getSubcategory());
 
     if (product.getCategory() != null) {
         dto.setCategoryId(product.getCategory().getId());
@@ -52,6 +54,8 @@ public class ProductMapper {
     dto.setExpiryDate(product.getExpiryDate());
     dto.setExpiryApplicable(product.getExpiryApplicable());
     dto.setActive(product.getActive());
+    dto.setCreatedAt(product.getCreatedAt());
+    dto.setUpdatedAt(product.getUpdatedAt());
 
     return dto;
 }

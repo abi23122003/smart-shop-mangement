@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { productLabel } from "../modules/products/productLabel";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import MessageOutlinedIcon from "@mui/icons-material/MessageOutlined";
@@ -86,7 +87,8 @@ export default function CustomerPage() {
     }
   }
   useEffect(() => {
-    load();
+    const timer = window.setTimeout(() => { load(); }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const rows = useMemo(() => {
@@ -110,7 +112,7 @@ export default function CustomerPage() {
             const product = products.find(
               (entry) => Number(entry.id) === Number(item.productId),
             );
-            return `${product?.productName ?? `Product #${item.productId}`} x${item.quantity}`;
+            return `${product ? productLabel(product) : `Product #${item.productId}`} x${item.quantity}`;
           }),
         );
         const paymentMethods = [
@@ -545,7 +547,7 @@ export default function CustomerPage() {
                               (entry) =>
                                 Number(entry.id) === Number(item.productId),
                             );
-                            return `${product?.productName ?? `Product #${item.productId}`} x${item.quantity}`;
+                            return `${product ? productLabel(product) : `Product #${item.productId}`} x${item.quantity}`;
                           })
                           .join(", ") || "—"}
                       </TableCell>
@@ -700,8 +702,7 @@ export default function CustomerPage() {
                 )
                 .map((product) => (
                   <MenuItem key={product.id} value={product.id}>
-                    {product.productName} ({product.quantity}{" "}
-                    {product.unit || "units"})
+                    {productLabel(product, { includeStock: true })}
                   </MenuItem>
                 ))}
             </TextField>

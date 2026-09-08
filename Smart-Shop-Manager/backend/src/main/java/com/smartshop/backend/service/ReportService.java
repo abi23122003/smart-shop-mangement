@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import com.smartshop.backend.dto.PurchaseReportDTO;
 import com.smartshop.backend.entity.Purchase;
 import com.smartshop.backend.entity.Product;
+import com.smartshop.backend.entity.SaleItem;
 import com.smartshop.backend.repository.PurchaseRepository;
 import com.smartshop.backend.dto.ProductReportDTO;
 import com.smartshop.backend.dto.StockReportDTO;
@@ -98,18 +99,32 @@ public ProfitReportDTO getProfitReport() {
             .mapToDouble(Sale::getTotalAmount)
             .sum();
 
-    Double totalPurchases = purchaseRepository.findAll()
+        Double totalPurchases = purchaseRepository.findAll()
             .stream()
             .mapToDouble(Purchase::getTotalAmount)
+            .sum();
+
+        Double costOfGoodsSold = saleRepository.findAll()
+            .stream()
+            .flatMap(sale -> sale.getSaleItems().stream())
+            .mapToDouble(this::getCostOfGoodsSold)
             .sum();
 
     ProfitReportDTO dto = new ProfitReportDTO();
 
     dto.setTotalSales(totalSales);
     dto.setTotalPurchases(totalPurchases);
-    dto.setTotalProfit(totalSales - totalPurchases);
+    dto.setTotalProfit(totalSales - costOfGoodsSold);
 
     return dto;
+}
+
+private double getCostOfGoodsSold(SaleItem saleItem) {
+    Double purchasePrice = saleItem.getPurchasePrice();
+    if (purchasePrice == null && saleItem.getProduct() != null) {
+        purchasePrice = saleItem.getProduct().getPurchasePrice();
+    }
+    return saleItem.getQuantity() * (purchasePrice == null ? 0.0 : purchasePrice);
 }
 private StockReportDTO convertStockToDTO(Product product) {
 

@@ -29,7 +29,7 @@ export default function Login() {
         <Box>
           <Typography variant="overline" sx={{ letterSpacing: 3, opacity: 0.8 }}>SMART SHOP MANAGER</Typography>
           <Typography variant="h3" sx={{ mt: 2, fontWeight: 800, lineHeight: 1.05 }}>Run your shop from a single dashboard.</Typography>
-          <Typography sx={{ mt: 2, maxWidth: 420, color: "rgba(255,255,255,0.85)" }}>Track inventory, customers, purchases, sales, and reports in one place without losing the details that matter.</Typography>
+          <Typography sx={{ mt: 2, maxWidth: 420, color: "rgba(255,255,255,0.85)" }}>Track inventory, customers, sales, and reports in one place without losing the details that matter.</Typography>
         </Box>
         <Box sx={{ mt: 4 }}>
           <Stack direction="row" spacing={3} divider={<Divider flexItem orientation="vertical" sx={{ borderColor: "rgba(255,255,255,0.18)" }} />}>

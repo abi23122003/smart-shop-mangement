@@ -8,15 +8,6 @@ export const reportDefinitions = {
       ["totalAmount", "Total", "currency"],
     ],
   },
-  purchases: {
-    label: "Purchases report",
-    columns: [
-      ["purchaseCode", "Purchase code"],
-      ["supplierName", "Supplier"],
-      ["purchaseDate", "Date"],
-      ["totalAmount", "Total", "currency"],
-    ],
-  },
   products: {
     label: "Products report",
     columns: [
@@ -42,14 +33,6 @@ export const reportDefinitions = {
     label: "Customers report",
     columns: [
       ["customerName", "Customer"],
-      ["phone", "Phone"],
-      ["email", "Email"],
-    ],
-  },
-  suppliers: {
-    label: "Suppliers report",
-    columns: [
-      ["supplierName", "Supplier"],
       ["phone", "Phone"],
       ["email", "Email"],
     ],

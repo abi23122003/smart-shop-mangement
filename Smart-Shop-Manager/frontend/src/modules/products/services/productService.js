@@ -5,6 +5,11 @@ export async function getProductPage(page, size) {
   return data;
 }
 
+export async function browseProducts({ keyword = "", categoryId, subcategory = "", brand = "", stockStatus = "all", page = 0, size = 20, sort = "productName", direction = "asc" }) {
+  const { data } = await api.get("/products/browse", { params: { keyword, categoryId: categoryId || undefined, subcategory, brand, stockStatus, page, size, sort, direction } });
+  return data;
+}
+
 export async function searchProducts(keyword) {
   const { data } = await api.get("/products/search", { params: { keyword } });
   return data;

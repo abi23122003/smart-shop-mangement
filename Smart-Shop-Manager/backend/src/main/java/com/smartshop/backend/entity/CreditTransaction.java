@@ -20,6 +20,10 @@ public class CreditTransaction {
     @JoinColumn(name = "credit_id")
     private Credit credit;
 
+    @ManyToOne
+    @JoinColumn(name = "sale_id")
+    private Sale sale;
+
     private LocalDate transactionDate;
 
     private String type;

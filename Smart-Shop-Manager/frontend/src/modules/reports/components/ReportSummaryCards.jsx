@@ -1,13 +1,11 @@
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
-import RequestQuoteOutlinedIcon from "@mui/icons-material/RequestQuoteOutlined";
 import { Card, CardContent, Grid, Stack, Typography } from "@mui/material";
 
 const money = (value) => `₹${Number(value ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 
 const metrics = [
   ["Total sales", "totalSales", PaidOutlinedIcon, "#1565c0"],
-  ["Total purchases", "totalPurchases", RequestQuoteOutlinedIcon, "#ef6c00"],
   ["Total profit", "totalProfit", AssessmentOutlinedIcon, "#2e7d32"],
 ];
 

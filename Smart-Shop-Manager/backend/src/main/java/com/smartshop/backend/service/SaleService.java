@@ -2,6 +2,7 @@ package com.smartshop.backend.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +59,9 @@ public SaleDTO saveSale(SaleDTO saleDTO) {
 
 Sale sale = new Sale();
 
-sale.setSaleCode(saleDTO.getSaleCode());
+sale.setSaleCode(saleDTO.getSaleCode() == null || saleDTO.getSaleCode().isBlank()
+        ? "TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()
+        : saleDTO.getSaleCode());
 sale.setSaleDate(saleDTO.getSaleDate());
 sale.setCustomer(customer);
 sale.setPaymentMethod(saleDTO.getPaymentMethod());
@@ -85,6 +88,7 @@ for (SaleItemDTO itemDTO : saleDTO.getSaleItems()) {
     saleItem.setProduct(product);
     saleItem.setQuantity(itemDTO.getQuantity());
     saleItem.setSellingPrice(itemDTO.getSellingPrice());
+    saleItem.setPurchasePrice(product.getPurchasePrice());
 
     double itemTotal =
             itemDTO.getQuantity() * itemDTO.getSellingPrice();
@@ -119,10 +123,11 @@ if ("Credit".equalsIgnoreCase(saleDTO.getPaymentMethod())) {
 
     CreditTransaction transaction = new CreditTransaction();
     transaction.setCredit(credit);
+    transaction.setSale(savedSale);
     transaction.setTransactionDate(saleDTO.getSaleDate());
     transaction.setType("PURCHASE");
     transaction.setAmount(totalAmount);
-    transaction.setRemarks("Credit sale: " + saleDTO.getSaleCode());
+    transaction.setRemarks("Credit sale: " + savedSale.getSaleCode());
     creditTransactionRepository.save(transaction);
 }
 
@@ -157,6 +162,18 @@ public void deleteSale(Long id) {
         Product product = saleItem.getProduct();
         product.setQuantity(product.getQuantity() + saleItem.getQuantity());
         productRepository.save(product);
+    }
+
+    if ("Credit".equalsIgnoreCase(sale.getPaymentMethod())) {
+        creditRepository.findByCustomer(sale.getCustomer()).ifPresent(credit -> {
+            double updatedBalance = Math.max(0.0, valueOrZero(credit.getBalance()) - valueOrZero(sale.getTotalAmount()));
+            double updatedTotalCredit = Math.max(0.0, valueOrZero(credit.getTotalCredit()) - valueOrZero(sale.getTotalAmount()));
+            credit.setBalance(updatedBalance);
+            credit.setTotalCredit(updatedTotalCredit);
+            credit.setStatus(updatedBalance == 0.0 ? "CLEARED" : "PENDING");
+            creditRepository.save(credit);
+        });
+        creditTransactionRepository.deleteBySale(sale);
     }
 
     saleRepository.delete(sale);

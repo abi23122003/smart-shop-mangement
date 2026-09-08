@@ -1,119 +1,50 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/Delete";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import QrCodeScannerOutlinedIcon from "@mui/icons-material/QrCodeScannerOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, Pagination, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import QrCodeScannerOutlinedIcon from "@mui/icons-material/QrCodeScannerOutlined";
+import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputAdornment, MenuItem, Pagination, Paper, Select, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import ProductFormDialog from "../modules/products/components/ProductFormDialog";
-import { createProduct, deleteProduct, getCategories, getProductPage, restockProduct, searchProducts, updateProduct } from "../modules/products/services/productService";
+import { browseProducts, createProduct, deleteProduct, getCategories, restockProduct, searchProducts, updateProduct } from "../modules/products/services/productService";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
+const defaults = { Grocery: ["Rice", "Dal", "Flour", "Sugar", "Salt", "Spices", "Cooking Oil"], "Personal Care": ["Bath Soap", "Hand Wash", "Shampoo", "Toothpaste", "Hair Oil"], "Home Care": ["Laundry Detergent", "Dishwash", "Floor Cleaner", "Toilet Cleaner"], Beverages: ["Soft Drinks", "Juice", "Tea", "Coffee", "Health Drinks"], Snacks: ["Biscuits", "Chips", "Chocolates", "Namkeen"], "Dairy & Bakery": ["Milk", "Curd", "Butter", "Bread", "Eggs"] };
+const money = (value) => `₹${Number(value ?? 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+const status = (p) => p.quantity === 0 ? ["Out of stock", "error"] : p.quantity <= p.minimumStock ? ["Low stock", "warning"] : ["In stock", "success"];
 const errorMessage = (error) => error.response?.data?.message ?? "The product request could not be completed.";
-const stockStatus = (product) => product.quantity === 0 ? ["Out of stock", "error"] : product.quantity <= product.minimumStock ? ["Low stock", "warning"] : ["In stock", "success"];
-const currency = (value) => `₹${Number(value ?? 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
 
 export default function ProductPage() {
-  const [products, setProducts] = useState([]); const [categories, setCategories] = useState([]); const [page, setPage] = useState(0); const [totalPages, setTotalPages] = useState(1); const [search, setSearch] = useState(""); const [loading, setLoading] = useState(true); const [error, setError] = useState(""); const [cameraError, setCameraError] = useState(""); const [scanMode, setScanMode] = useState("search"); const [scanValue, setScanValue] = useState(""); const [dialog, setDialog] = useState(false); const [scannerOpen, setScannerOpen] = useState(false); const [restockOpen, setRestockOpen] = useState(false); const [restockProductDetails, setRestockProductDetails] = useState(null); const [restockBarcode, setRestockBarcode] = useState(""); const [restockQuantity, setRestockQuantity] = useState(""); const [restockSaving, setRestockSaving] = useState(false); const [selected, setSelected] = useState(null); const [saving, setSaving] = useState(false);
-  const load = useCallback(async (targetPage = page, keyword = search) => { setLoading(true); try { setError(""); if (keyword.trim()) { const matches = await searchProducts(keyword.trim()); setProducts(matches.slice(targetPage * PAGE_SIZE, (targetPage + 1) * PAGE_SIZE)); setTotalPages(Math.max(1, Math.ceil(matches.length / PAGE_SIZE))); } else { const result = await getProductPage(targetPage, PAGE_SIZE); setProducts(result.content); setTotalPages(Math.max(1, result.totalPages)); } } catch (requestError) { setError(errorMessage(requestError)); } finally { setLoading(false); } }, [page, search]);
-  useEffect(() => { getCategories().then(setCategories).catch(() => setError("Categories could not be loaded. Add or restore a category before saving a product.")); }, []);
-  useEffect(() => { const timer = setTimeout(load, 0); return () => clearTimeout(timer); }, [load]);
-  useEffect(() => {
-    if (!scannerOpen) return undefined;
-    let scanner;
-    let startTimer;
-    let started = false;
-    let cancelled = false;
-    setCameraError("");
-    const startCamera = async () => {
-      try {
-        const cameraElement = document.getElementById("product-camera-reader");
-        if (!cameraElement) {
-          setCameraError("Camera view is not ready. Close and open the scanner again, or enter the barcode below.");
-          return;
-        }
-        scanner = new Html5Qrcode(cameraElement.id);
-        await scanner.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 260, height: 160 } },
-          (decodedText) => handleScannedBarcode(decodedText),
-          () => {},
-        );
-        started = true;
-        if (cancelled) {
-          await scanner.stop();
-          started = false;
-        }
-      } catch {
-        if (!cancelled) {
-          setCameraError("Camera could not start. Allow camera access or enter the barcode below.");
-        }
-      }
-    };
-    startTimer = window.setTimeout(startCamera, 150);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(startTimer);
-      if (scanner && started) {
-        scanner.stop()
-          .then(() => {
-            started = false;
-          })
-          .catch(() => {});
-      }
-    };
-  }, [scannerOpen]);
-  function changeSearch(value) { setSearch(value); setPage(0); }
-  function openScanner(mode) { setScanMode(mode); setScanValue(""); setScannerOpen(true); }
-  async function handleScannedBarcode(value) {
-    const barcode = value.trim();
-    if (!barcode) return;
-    setScannerOpen(false);
-    if (scanMode === "search") {
-      changeSearch(barcode);
-      return;
-    }
-    setRestockBarcode(barcode);
-    setRestockQuantity("");
-    setRestockProductDetails(null);
-    setRestockOpen(true);
-    try {
-      const matches = await searchProducts(barcode);
-      const product = matches.find((entry) => String(entry.barcode).trim() === barcode);
-      if (!product) throw new Error("No product found for this barcode.");
-      setRestockProductDetails(product);
-    } catch (requestError) {
-      setError(requestError.message === "No product found for this barcode." ? requestError.message : errorMessage(requestError));
-    }
-  }
-  async function submitRestock(event) {
-    event.preventDefault();
-    const quantity = Number(restockQuantity);
-    if (!restockProductDetails || !quantity || quantity <= 0) {
-      setError("Scan an existing product and enter a quantity greater than zero.");
-      return;
-    }
-    setRestockSaving(true);
-    try {
-      await restockProduct(restockBarcode, quantity);
-      setRestockOpen(false);
-      setError("");
-      await load(0, search);
-      setPage(0);
-    } catch (requestError) {
-      setError(errorMessage(requestError));
-    } finally {
-      setRestockSaving(false);
-    }
-  }
-  async function save(product) { setSaving(true); try { if (selected) await updateProduct(selected.id, product); else await createProduct(product); setDialog(false); await load(0, search); setPage(0); } catch (requestError) { setError(errorMessage(requestError)); } finally { setSaving(false); } }
-  async function remove(id) { if (!window.confirm("Delete this product? This cannot be undone.")) return; try { await deleteProduct(id); await load(); } catch (requestError) { setError(errorMessage(requestError)); } }
-  return <Stack spacing={3}><Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between" }}><Box><Typography variant="h4">Products</Typography><Typography color="text.secondary">Manage inventory, dealer prices, selling prices, and stock levels.</Typography></Box><Stack direction={{ xs: "column", sm: "row" }} spacing={1}><Button variant="outlined" startIcon={<QrCodeScannerOutlinedIcon />} onClick={() => openScanner("restock")}>Restock by scan</Button><Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={() => { setSelected(null); setDialog(true); }}>Add product</Button></Stack></Stack>
-    {error && <Alert severity="error" onClose={() => setError("")}>{error}</Alert>}<Stack direction={{ xs: "column", sm: "row" }} spacing={1}><TextField fullWidth label="Search by product name or barcode" value={search} onChange={(e) => changeSearch(e.target.value)} slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }} /><Button variant="outlined" startIcon={<QrCodeScannerOutlinedIcon />} onClick={() => openScanner("search")} sx={{ minWidth: { sm: 150 } }}>Scan to find</Button></Stack>
-    <Paper sx={{ overflowX: "auto" }}><Table><TableHead><TableRow><TableCell>Product</TableCell><TableCell>Barcode</TableCell><TableCell>Stock</TableCell><TableCell>Status</TableCell><TableCell align="right">Dealer price</TableCell><TableCell align="right">Selling price</TableCell><TableCell align="right">Actions</TableCell></TableRow></TableHead><TableBody>{loading ? <TableRow><TableCell colSpan={7} align="center"><CircularProgress size={24} /></TableCell></TableRow> : products.map((product) => { const [label, color] = stockStatus(product); return <TableRow key={product.id} hover><TableCell><Typography fontWeight={600}>{product.productName}</Typography><Typography variant="body2" color="text.secondary">{product.brand || "No brand"}</Typography></TableCell><TableCell>{product.barcode || "—"}</TableCell><TableCell><Typography fontWeight={650}>{product.quantity ?? 0} {product.unit || "units"}</Typography><Typography variant="body2" color="text.secondary">Minimum {product.minimumStock ?? 0}</Typography></TableCell><TableCell><Chip label={label} color={color} size="small" /></TableCell><TableCell align="right">{currency(product.purchasePrice)}</TableCell><TableCell align="right" sx={{ fontWeight: 650 }}>{currency(product.sellingPrice)}</TableCell><TableCell align="right"><IconButton aria-label="Edit product" onClick={() => { setSelected(product); setDialog(true); }}><EditOutlinedIcon /></IconButton><IconButton aria-label="Delete product" color="error" onClick={() => remove(product.id)}><DeleteOutlineIcon /></IconButton></TableCell></TableRow>; })}{!loading && !products.length && <TableRow><TableCell colSpan={7} align="center">No products found.</TableCell></TableRow>}</TableBody></Table></Paper>
-    <Box sx={{ display: "flex", justifyContent: "center" }}><Pagination count={totalPages} page={page + 1} onChange={(_, value) => setPage(value - 1)} color="primary" /></Box>{dialog && <ProductFormDialog key={selected?.id ?? "new"} open={dialog} product={selected} categories={categories} saving={saving} onClose={() => setDialog(false)} onSubmit={save} />}
-    <Dialog open={scannerOpen} onClose={() => setScannerOpen(false)} maxWidth="sm" fullWidth><DialogTitle>{scanMode === "restock" ? "Restock by barcode" : "Scan product barcode"}</DialogTitle><DialogContent><Stack spacing={2} sx={{ pt: 1 }}><Typography color="text.secondary">Point your phone camera at the barcode. Allow camera access when the browser asks.</Typography><Box id="product-camera-reader" sx={{ width: "100%", minHeight: 220, overflow: "hidden", borderRadius: 1, bgcolor: "grey.100", "& video": { width: "100%" } }} />{cameraError && <Alert severity="warning">{cameraError}</Alert>}<TextField autoFocus fullWidth label="Enter barcode manually" value={scanValue} onChange={(event) => setScanValue(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); handleScannedBarcode(event.currentTarget.value); } }} placeholder="Use this if camera scanning is unavailable" /></Stack></DialogContent><DialogActions><Button onClick={() => setScannerOpen(false)}>Close</Button><Button variant="contained" onClick={() => handleScannedBarcode(scanValue)}>{scanMode === "restock" ? "Load product" : "Find product"}</Button></DialogActions></Dialog>
-    <Dialog open={restockOpen} onClose={() => !restockSaving && setRestockOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: { component: "form", onSubmit: submitRestock } }}><DialogTitle>Restock product</DialogTitle><DialogContent><Stack spacing={2} sx={{ pt: 1 }}>{restockProductDetails ? <><Typography variant="h6">{restockProductDetails.productName}</Typography><Typography color="text.secondary">Category: {categories.find((category) => Number(category.id) === Number(restockProductDetails.categoryId))?.name ?? "—"} · Variant: {restockProductDetails.variant || "—"}</Typography><Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}><Chip label={`Dealer ${currency(restockProductDetails.purchasePrice)}`} /><Chip label={`Selling ${currency(restockProductDetails.sellingPrice)}`} /><Chip label={`Current stock ${restockProductDetails.quantity ?? 0} ${restockProductDetails.unit || "units"}`} /></Stack></> : <CircularProgress size={26} />}<TextField label="Restock quantity" required type="number" value={restockQuantity} onChange={(event) => setRestockQuantity(event.target.value)} slotProps={{ htmlInput: { min: 1 } }} disabled={!restockProductDetails} /><Typography variant="body2" color="text.secondary">Barcode: {restockBarcode}</Typography></Stack></DialogContent><DialogActions><Button onClick={() => setRestockOpen(false)}>Cancel</Button><Button type="submit" variant="contained" disabled={restockSaving || !restockProductDetails}>{restockSaving ? "Updating..." : "Update stock"}</Button></DialogActions></Dialog>
+  const [products, setProducts] = useState([]), [allProducts, setAllProducts] = useState([]), [categories, setCategories] = useState([]), [page, setPage] = useState(0), [pages, setPages] = useState(1), [total, setTotal] = useState(0), [keyword, setKeyword] = useState(""), [categoryId, setCategoryId] = useState(""), [subcategory, setSubcategory] = useState(""), [brand, setBrand] = useState(""), [stock, setStock] = useState("all"), [loading, setLoading] = useState(true), [error, setError] = useState(""), [formOpen, setFormOpen] = useState(false), [selected, setSelected] = useState(null), [viewing, setViewing] = useState(null), [saving, setSaving] = useState(false), [scannerOpen, setScannerOpen] = useState(false), [scannerError, setScannerError] = useState(""), [scanValue, setScanValue] = useState(""), [restockOpen, setRestockOpen] = useState(false), [scannedProduct, setScannedProduct] = useState(null), [restockQuantity, setRestockQuantity] = useState("");
+  const categoryName = categories.find((c) => Number(c.id) === Number(categoryId))?.name;
+  const subcategories = useMemo(() => [...new Set([...(defaults[categoryName] ?? []), ...allProducts.filter((p) => !categoryId || Number(p.categoryId) === Number(categoryId)).map((p) => p.subcategory).filter(Boolean)])].sort(), [allProducts, categoryId, categoryName]);
+  const brands = useMemo(() => [...new Set(allProducts.filter((p) => (!categoryId || Number(p.categoryId) === Number(categoryId)) && (!subcategory || p.subcategory === subcategory)).map((p) => p.brand).filter(Boolean))].sort(), [allProducts, categoryId, subcategory]);
+  const refreshTaxonomy = useCallback(async () => setAllProducts(await searchProducts("")), []);
+  const load = useCallback(async () => { setLoading(true); try { setError(""); const data = await browseProducts({ keyword: keyword.trim(), categoryId, subcategory, brand, stockStatus: stock, page, size: PAGE_SIZE }); setProducts(data.content); setPages(Math.max(1, data.totalPages)); setTotal(data.totalElements); } catch (e) { setError(errorMessage(e)); } finally { setLoading(false); } }, [keyword, categoryId, subcategory, brand, stock, page]);
+  useEffect(() => { const timer = window.setTimeout(() => { getCategories().then(setCategories).catch(() => setError("Categories could not be loaded.")); refreshTaxonomy().catch(() => {}); }, 0); return () => window.clearTimeout(timer); }, [refreshTaxonomy]);
+  useEffect(() => { const timer = window.setTimeout(() => { load(); }, 0); return () => window.clearTimeout(timer); }, [load]);
+  useEffect(() => { if (!scannerOpen) return undefined; let scanner; let started = false; let cancelled = false; const start = async () => { try { scanner = new Html5Qrcode("product-camera-reader"); await scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 260, height: 160 } }, (decoded) => handleBarcode(decoded), () => {}); started = true; if (cancelled) await scanner.stop(); } catch { if (!cancelled) setScannerError("Camera could not start. Allow camera access or enter the barcode below."); } }; const timer = window.setTimeout(start, 150); return () => { cancelled = true; window.clearTimeout(timer); if (scanner && started) scanner.stop().catch(() => {}); }; }, [scannerOpen]);
+  const setFilter = (setter, value) => { setter(value); setPage(0); };
+  const changeCategory = (id) => { setCategoryId(id); setSubcategory(""); setBrand(""); setPage(0); };
+  async function save(product) { setSaving(true); try { if (selected) await updateProduct(selected.id, product); else await createProduct(product); setFormOpen(false); await refreshTaxonomy(); await load(); } catch (e) { setError(errorMessage(e)); } finally { setSaving(false); } }
+  async function deactivate(product) { if (!window.confirm(`Deactivate ${product.productName}? It will be hidden from the active product list.`)) return; try { await deleteProduct(product.id); await refreshTaxonomy(); await load(); } catch (e) { setError(errorMessage(e)); } }
+  function openScanner() { setScannerError(""); setScanValue(""); setScannerOpen(true); }
+  async function handleBarcode(value) { const barcode = value.trim(); if (!barcode) return; setScannerOpen(false); try { const match = (await searchProducts(barcode)).find((p) => String(p.barcode ?? "").trim() === barcode); if (!match) throw new Error("No product found for this barcode."); setScannedProduct(match); setRestockQuantity(""); setRestockOpen(true); } catch (e) { setError(e.message === "No product found for this barcode." ? e.message : errorMessage(e)); } }
+  async function submitRestock(event) { event.preventDefault(); const quantity = Number(restockQuantity); if (!scannedProduct || !quantity || quantity <= 0) return; try { await restockProduct(scannedProduct.barcode, quantity); setRestockOpen(false); await refreshTaxonomy(); await load(); } catch (e) { setError(errorMessage(e)); } }
+  const active = [["Category", categoryName, () => changeCategory("")], ["Subcategory", subcategory, () => setFilter(setSubcategory, "")], ["Brand", brand, () => setFilter(setBrand, "")], ["Stock Status", stock === "all" ? "" : { in: "In Stock", low: "Low Stock", out: "Out of Stock" }[stock], () => setFilter(setStock, "all")]].filter(([, value]) => value);
+  return <Stack spacing={3}><Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between" }}><Box><Typography variant="h4">Products</Typography><Typography color="text.secondary">Classify and find stock by category, subcategory, brand, product, and variant.</Typography></Box><Stack direction="row" spacing={1}><Button variant="outlined" startIcon={<QrCodeScannerOutlinedIcon />} onClick={openScanner}>Scan barcode</Button><Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={() => { setSelected(null); setFormOpen(true); }}>Add product</Button></Stack></Stack>
+    {error && <Alert severity="error" onClose={() => setError("")}>{error}</Alert>}
+    <TextField fullWidth label="Search by product, brand, or barcode" value={keyword} onChange={(e) => setFilter(setKeyword, e.target.value)} slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> } }} />
+    <Stack direction={{ xs: "column", sm: "row" }} spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}><Select value={categoryId} displayEmpty onChange={(e) => changeCategory(e.target.value)} renderValue={(v) => `Category: ${v ? categoryName : "All"}`} sx={{ minWidth: 190 }}><MenuItem value="">All</MenuItem>{categories.filter((c) => c.active !== false).map((c) => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}</Select><Select value={subcategory} displayEmpty disabled={!categoryId} onChange={(e) => setFilter(setSubcategory, e.target.value)} renderValue={(v) => `Subcategory: ${v || "All"}`} sx={{ minWidth: 190 }}><MenuItem value="">All</MenuItem>{subcategories.map((v) => <MenuItem key={v} value={v}>{v}</MenuItem>)}</Select><Select value={brand} displayEmpty disabled={!categoryId} onChange={(e) => setFilter(setBrand, e.target.value)} renderValue={(v) => `Brand: ${v || "All"}`} sx={{ minWidth: 180 }}><MenuItem value="">All</MenuItem>{brands.map((v) => <MenuItem key={v} value={v}>{v}</MenuItem>)}</Select><Select value={stock} onChange={(e) => setFilter(setStock, e.target.value)} renderValue={(v) => `Stock Status: ${{ all: "All", in: "In Stock", low: "Low Stock", out: "Out of Stock" }[v]}`} sx={{ minWidth: 180 }}><MenuItem value="all">All</MenuItem><MenuItem value="in">In Stock</MenuItem><MenuItem value="low">Low Stock</MenuItem><MenuItem value="out">Out of Stock</MenuItem></Select></Stack>
+    {!!active.length && <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: "center", flexWrap: "wrap" }}><Typography variant="body2" color="text.secondary">Active filters:</Typography>{active.map(([label, value, clear]) => <Chip key={label} label={`${label}: ${value}`} onDelete={clear} size="small" color="primary" variant="outlined" />)}<Button size="small" onClick={() => { changeCategory(""); setStock("all"); }}>Clear filters</Button></Stack>}
+    <Paper sx={{ overflowX: "auto" }}><Table><TableHead><TableRow><TableCell>S.No.</TableCell><TableCell>Product</TableCell><TableCell>Barcode</TableCell><TableCell>Stock</TableCell><TableCell>Status</TableCell><TableCell align="right">Dealer Price</TableCell><TableCell align="right">Selling Price</TableCell><TableCell align="right">Actions</TableCell></TableRow></TableHead><TableBody>{loading ? <TableRow><TableCell colSpan={8} align="center"><CircularProgress size={24} /></TableCell></TableRow> : products.map((p, i) => { const [label, color] = status(p); return <TableRow key={p.id} hover><TableCell>{page * PAGE_SIZE + i + 1}</TableCell><TableCell><Typography fontWeight={600}>{p.productName}</Typography><Typography variant="body2" color="text.secondary">{[p.brand, p.subcategory, p.variant].filter(Boolean).join(" • ") || "Unclassified"}</Typography></TableCell><TableCell>{p.barcode || "—"}</TableCell><TableCell>{p.quantity ?? 0} {p.unit || "units"}</TableCell><TableCell><Chip label={label} color={color} size="small" /></TableCell><TableCell align="right">{money(p.purchasePrice)}</TableCell><TableCell align="right" sx={{ fontWeight: 600 }}>{money(p.sellingPrice)}</TableCell><TableCell align="right"><IconButton aria-label="View product" onClick={() => setViewing(p)}><VisibilityOutlinedIcon /></IconButton><IconButton aria-label="Edit product" onClick={() => { setSelected(p); setFormOpen(true); }}><EditOutlinedIcon /></IconButton><IconButton aria-label="Deactivate product" color="error" onClick={() => deactivate(p)}><DeleteOutlineIcon /></IconButton></TableCell></TableRow>; })}{!loading && !products.length && <TableRow><TableCell colSpan={8} align="center">No products match the selected filters.</TableCell></TableRow>}</TableBody></Table></Paper>
+    <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}><Typography variant="body2" color="text.secondary">Showing {products.length ? page * PAGE_SIZE + 1 : 0}–{Math.min((page + 1) * PAGE_SIZE, total)} of {total} products</Typography><Pagination count={pages} page={page + 1} onChange={(_, value) => setPage(value - 1)} color="primary" /></Stack>
+    {formOpen && <ProductFormDialog key={selected?.id ?? "new"} open={formOpen} product={selected} categories={categories} saving={saving} onClose={() => setFormOpen(false)} onSubmit={save} />}<ProductViewDialog product={viewing} categories={categories} onClose={() => setViewing(null)} />
+    <Dialog open={scannerOpen} onClose={() => setScannerOpen(false)} maxWidth="sm" fullWidth><DialogTitle>Scan product barcode</DialogTitle><DialogContent><Stack spacing={2} sx={{ pt: 1 }}><Typography color="text.secondary">Scan a barcode to load the exact product for viewing or restocking.</Typography><Box id="product-camera-reader" sx={{ minHeight: 220, overflow: "hidden", borderRadius: 1, bgcolor: "grey.100", "& video": { width: "100%" } }} />{scannerError && <Alert severity="warning">{scannerError}</Alert>}<TextField autoFocus label="Enter barcode manually" value={scanValue} onChange={(e) => setScanValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleBarcode(e.currentTarget.value); } }} /></Stack></DialogContent><DialogActions><Button onClick={() => setScannerOpen(false)}>Close</Button><Button variant="contained" onClick={() => handleBarcode(scanValue)}>Find product</Button></DialogActions></Dialog>
+    <Dialog open={restockOpen} onClose={() => setRestockOpen(false)} maxWidth="sm" fullWidth slotProps={{ paper: { component: "form", onSubmit: submitRestock } }}><DialogTitle>Scanned product</DialogTitle><DialogContent><Stack spacing={2} sx={{ pt: 1 }}>{scannedProduct && <><Typography variant="h6">{scannedProduct.productName}</Typography><Typography color="text.secondary">{[scannedProduct.brand, scannedProduct.subcategory, scannedProduct.variant].filter(Boolean).join(" • ")}</Typography><Typography>Current stock: {scannedProduct.quantity ?? 0} {scannedProduct.unit || "units"}</Typography></>}<TextField required label="Restock quantity" type="number" value={restockQuantity} onChange={(e) => setRestockQuantity(e.target.value)} slotProps={{ htmlInput: { min: 1 } }} /></Stack></DialogContent><DialogActions><Button onClick={() => { setRestockOpen(false); setViewing(scannedProduct); }}>View details</Button><Button type="submit" variant="contained">Update stock</Button></DialogActions></Dialog>
   </Stack>;
 }
+
+function ProductViewDialog({ product, categories, onClose }) { if (!product) return null; const [label, color] = status(product); const fields = [["Product ID", product.id], ["Product name", product.productName], ["Category", categories.find((c) => Number(c.id) === Number(product.categoryId))?.name || "—"], ["Subcategory", product.subcategory || "—"], ["Brand", product.brand || "—"], ["Size / variant", product.variant || "—"], ["Barcode", product.barcode || "—"], ["Unit", product.unit || "—"], ["Current stock", `${product.quantity ?? 0} ${product.unit || "units"}`], ["Minimum stock", product.minimumStock ?? 0], ["Stock status", <Chip label={label} color={color} size="small" />], ["Dealer price", money(product.purchasePrice)], ["Selling price", money(product.sellingPrice)], ["Profit per unit", money((product.sellingPrice ?? 0) - (product.purchasePrice ?? 0))], ["Created", product.createdAt ? new Date(product.createdAt).toLocaleString() : "—"], ["Last updated", product.updatedAt ? new Date(product.updatedAt).toLocaleString() : "—"]]; return <Dialog open onClose={onClose} maxWidth="sm" fullWidth><DialogTitle>Product details</DialogTitle><DialogContent><Stack spacing={1.25} sx={{ pt: 1 }}>{fields.map(([name, value]) => <Stack key={name} direction="row" spacing={2} sx={{ justifyContent: "space-between" }}><Typography color="text.secondary">{name}</Typography><Typography textAlign="right">{value}</Typography></Stack>)}</Stack></DialogContent><DialogActions><Button onClick={onClose}>Close</Button></DialogActions></Dialog>; }

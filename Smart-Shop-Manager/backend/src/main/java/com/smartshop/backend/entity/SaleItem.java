@@ -30,5 +30,7 @@ public class SaleItem {
 
     private Double sellingPrice;
 
+    private Double purchasePrice;
+
     private Double totalPrice;
 }

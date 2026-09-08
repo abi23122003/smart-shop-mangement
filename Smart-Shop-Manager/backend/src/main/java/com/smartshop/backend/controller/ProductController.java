@@ -57,6 +57,19 @@ public Page<ProductDTO> getProductsByPage(
 
     return productService.getProductsByPage(page, size);
 }
+@GetMapping("/browse")
+public Page<ProductDTO> browseProducts(
+        @RequestParam(defaultValue = "") String keyword,
+        @RequestParam(required = false) Long categoryId,
+        @RequestParam(defaultValue = "") String subcategory,
+        @RequestParam(defaultValue = "") String brand,
+        @RequestParam(defaultValue = "all") String stockStatus,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(defaultValue = "productName") String sort,
+        @RequestParam(defaultValue = "asc") String direction) {
+    return productService.browseProducts(keyword, categoryId, subcategory, brand, stockStatus, page, size, sort, direction);
+}
 @GetMapping("/filter")
 public Page<ProductDTO> filterProducts(
 

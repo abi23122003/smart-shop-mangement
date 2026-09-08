@@ -1,8 +1,6 @@
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
-import TrendingDownOutlinedIcon from "@mui/icons-material/TrendingDownOutlined";
 import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import { Alert, Box, Button, CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material";
@@ -16,8 +14,8 @@ export default function DashboardPage() {
   if (error) return <Alert severity="error" action={<Button color="inherit" size="small" onClick={refresh}>Retry</Button>}>{error}</Alert>;
   const metrics = [
     ["Total products", data.totalProducts, <Inventory2OutlinedIcon />, "#1565c0"], ["Categories", data.totalCategories, <CategoryOutlinedIcon />, "#7b1fa2"],
-    ["Customers", data.totalCustomers, <GroupsOutlinedIcon />, "#00897b"], ["Suppliers", data.totalSuppliers, <LocalShippingOutlinedIcon />, "#ef6c00"],
-    ["Today's sales", currency.format(data.todaySales), <TrendingUpOutlinedIcon />, "#2e7d32"], ["Today's purchases", currency.format(data.todayPurchases), <TrendingDownOutlinedIcon />, "#d32f2f"],
+    ["Customers", data.totalCustomers, <GroupsOutlinedIcon />, "#00897b"],
+    ["Today's sales", currency.format(data.todaySales), <TrendingUpOutlinedIcon />, "#2e7d32"],
   ];
   return <Stack spacing={3}><Box><Typography variant="h4">Dashboard</Typography><Typography color="text.secondary">A snapshot of your shop today.</Typography></Box>
     <Grid container spacing={2}>{metrics.map(([label, value, icon, color]) => <Grid key={label} size={{ xs: 12, sm: 6, lg: 4 }}><MetricCard label={label} value={value} icon={icon} color={color} /></Grid>)}</Grid>

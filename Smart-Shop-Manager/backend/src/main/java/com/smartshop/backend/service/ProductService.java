@@ -30,6 +30,8 @@ public class ProductService {
 
  public ProductDTO saveProduct(ProductDTO productDTO) {
 
+    validateBarcode(productDTO.getBarcode(), null);
+
     Product product = ProductMapper.toEntity(productDTO);
 
     Category category = categoryRepository.findById(productDTO.getCategoryId())
@@ -74,6 +76,13 @@ public Page<ProductDTO> getProductsByPage(int page, int size) {
             productRepository.findAll(PageRequest.of(page, size));
 
     return products.map(ProductMapper::toDTO);
+}
+public Page<ProductDTO> browseProducts(String keyword, Long categoryId, String subcategory, String brand, String stockStatus, int page, int size, String sort, String direction) {
+    List<String> permittedSorts = List.of("productName", "quantity", "purchasePrice", "sellingPrice");
+    String sortField = permittedSorts.contains(sort) ? sort : "productName";
+    Sort order = "desc".equalsIgnoreCase(direction) ? Sort.by(sortField).descending() : Sort.by(sortField).ascending();
+    return productRepository.findActiveProductsByClassification(keyword.trim(), categoryId, subcategory.trim(), brand.trim(), stockStatus, PageRequest.of(page, size, order))
+            .map(ProductMapper::toDTO);
 }
 public List<ProductDTO> getProductsSorted(String field, String direction) {
 
@@ -167,10 +176,13 @@ public Optional<ProductDTO> getProductById(Long id) {
 
         Product product = existingProduct.get();
 
+        validateBarcode(updatedProduct.getBarcode(), id);
+
         product.setProductCode(updatedProduct.getProductCode());
         product.setBarcode(updatedProduct.getBarcode());
         product.setProductName(updatedProduct.getProductName());
         product.setBrand(updatedProduct.getBrand());
+        product.setSubcategory(updatedProduct.getSubcategory());
         Category category = categoryRepository.findById(updatedProduct.getCategoryId())
         .orElseThrow(() -> new RuntimeException("Category not found"));
 
@@ -193,7 +205,21 @@ product.setCategory(category);
     return null;
 }
 public void deleteProduct(Long id) {
-    productRepository.deleteById(id);
+    Product product = productRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Product not found"));
+    product.setActive(false);
+    productRepository.save(product);
+}
+
+private void validateBarcode(String barcode, Long currentProductId) {
+    if (barcode == null || barcode.isBlank()) {
+        return;
+    }
+    productRepository.findByBarcode(barcode.trim()).ifPresent(existing -> {
+        if (currentProductId == null || !existing.getId().equals(currentProductId)) {
+            throw new IllegalArgumentException("Barcode already exists for another product.");
+        }
+    });
 }
 
 }

@@ -1,6 +1,7 @@
 package com.smartshop.backend.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ public class ProductDTO {
     @NotBlank(message = "Product Name is required")
     private String productName;
     private String brand;
+    private String subcategory;
     private Long categoryId;
     private String variant;
     private String unit;
@@ -30,4 +32,6 @@ public class ProductDTO {
     private LocalDate expiryDate;
     private Boolean expiryApplicable;
     private Boolean active;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

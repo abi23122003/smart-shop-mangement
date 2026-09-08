@@ -58,4 +58,43 @@ OR LOWER(p.productCode) LIKE LOWER(CONCAT('%', :keyword, '%'))
 OR LOWER(p.barcode) LIKE LOWER(CONCAT('%', :keyword, '%'))
 """)
 List<Product> searchProducts(@Param("keyword") String keyword);
+@Query("""
+    SELECT p FROM Product p
+    WHERE COALESCE(p.active, true) = true
+      AND (:keyword = '' OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(COALESCE(p.brand, '')) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(COALESCE(p.barcode, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))
+      AND (:categoryId IS NULL OR p.category.id = :categoryId)
+      AND (:stockStatus = 'all'
+           OR (:stockStatus = 'in' AND p.quantity > p.minimumStock)
+           OR (:stockStatus = 'low' AND p.quantity > 0 AND p.quantity <= p.minimumStock)
+           OR (:stockStatus = 'out' AND p.quantity = 0))
+""")
+Page<Product> findActiveProducts(
+        @Param("keyword") String keyword,
+        @Param("categoryId") Long categoryId,
+        @Param("stockStatus") String stockStatus,
+        Pageable pageable);
+
+@Query("""
+    SELECT p FROM Product p
+    WHERE COALESCE(p.active, true) = true
+      AND (:keyword = '' OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(COALESCE(p.brand, '')) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(COALESCE(p.barcode, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))
+      AND (:categoryId IS NULL OR p.category.id = :categoryId)
+      AND (:subcategory = '' OR LOWER(COALESCE(p.subcategory, '')) = LOWER(:subcategory))
+      AND (:brand = '' OR LOWER(COALESCE(p.brand, '')) = LOWER(:brand))
+      AND (:stockStatus = 'all'
+           OR (:stockStatus = 'in' AND p.quantity > p.minimumStock)
+           OR (:stockStatus = 'low' AND p.quantity > 0 AND p.quantity <= p.minimumStock)
+           OR (:stockStatus = 'out' AND p.quantity = 0))
+""")
+Page<Product> findActiveProductsByClassification(
+        @Param("keyword") String keyword,
+        @Param("categoryId") Long categoryId,
+        @Param("subcategory") String subcategory,
+        @Param("brand") String brand,
+        @Param("stockStatus") String stockStatus,
+        Pageable pageable);
 }

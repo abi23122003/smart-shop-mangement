@@ -5,7 +5,7 @@ export const defaultSettings = {
   compactTables: false,
 };
 
-const allowedReportTypes = new Set(["sales", "purchases", "products", "stock", "customers", "suppliers"]);
+const allowedReportTypes = new Set(["sales", "products", "stock", "customers"]);
 
 function normalizeSettings(settings) {
   const merged = { ...defaultSettings, ...(settings ?? {}) };
