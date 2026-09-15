@@ -43,7 +43,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOriginPatterns(
-                        List.of("http://localhost:*", "http://127.0.0.1:*"));
+                        List.of("http://localhost:*", "http://127.0.0.1:*", "https://*.vercel.app", "https://*.onrender.com"));
 
     configuration.setAllowedMethods(
             List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
