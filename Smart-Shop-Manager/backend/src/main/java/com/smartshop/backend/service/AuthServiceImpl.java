@@ -2,7 +2,10 @@ package com.smartshop.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.smartshop.backend.dto.LoginRequest;
@@ -18,18 +21,22 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtService jwtService;
 
-  @Override
-public LoginResponse login(LoginRequest request) {
+    @Override
+    public LoginResponse login(LoginRequest request) {
 
-    authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                    request.getUsername(),
-                    request.getPassword()
-            )
-    );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException | UsernameNotFoundException ex) {
+            throw new BadCredentialsException("Invalid username or password", ex);
+        }
 
-    String token = jwtService.generateToken(request.getUsername());
+        String token = jwtService.generateToken(request.getUsername());
 
-    return new LoginResponse(token);
-}
-}
+        return new LoginResponse(token);
+    }
+}

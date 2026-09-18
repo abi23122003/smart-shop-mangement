@@ -8,8 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -34,6 +37,13 @@ public class GlobalExceptionHandler {
         });
 
         return errors;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public Map<String, String> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Malformed HTTP request body: {}", ex.getMessage());
+        return Map.of("message", "Malformed request body");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -68,10 +78,10 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(AuthenticationException.class)
-    public Map<String, String> handleAuthenticationException(AuthenticationException ex) {
+    @ExceptionHandler({AuthenticationException.class, BadCredentialsException.class, UsernameNotFoundException.class})
+    public Map<String, String> handleAuthenticationException(Exception ex) {
         log.warn("Authentication failed: {}", ex.getMessage());
-        return Map.of("message", "Authentication failed: " + ex.getMessage());
+        return Map.of("message", "Invalid username or password");
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -81,3 +91,4 @@ public class GlobalExceptionHandler {
         return Map.of("message", "An unexpected error occurred");
     }
 }
+
