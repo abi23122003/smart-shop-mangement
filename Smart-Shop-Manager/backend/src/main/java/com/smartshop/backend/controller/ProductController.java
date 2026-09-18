@@ -1,10 +1,11 @@
 package com.smartshop.backend.controller;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,114 +31,111 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
- @PostMapping
-   public ProductDTO saveProduct(@Valid @RequestBody ProductDTO productDTO) {
-    return productService.saveProduct(productDTO);
-}
-@PostMapping("/restock")
-public ProductDTO restockProduct(@Valid @RequestBody ProductRestockRequest request) {
-    return productService.restockProduct(request);
-}
-@GetMapping
-public List<ProductDTO> getAllProducts() {
-    return productService.getAllProducts();
-}
-@GetMapping("/search")
-public List<ProductDTO> searchProducts(
-        @RequestParam String keyword) {
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductDTO saveProduct(@Valid @RequestBody ProductDTO productDTO) {
+        return productService.saveProduct(productDTO);
+    }
 
-    return productService.searchProducts(keyword);
-}
-@GetMapping("/page")
-public Page<ProductDTO> getProductsByPage(
+    @PostMapping("/restock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductDTO restockProduct(@Valid @RequestBody ProductRestockRequest request) {
+        return productService.restockProduct(request);
+    }
 
-        @RequestParam int page,
+    @GetMapping
+    public List<ProductDTO> getAllProducts() {
+        return productService.getAllProducts();
+    }
 
-        @RequestParam int size) {
+    @GetMapping("/search")
+    public List<ProductDTO> searchProducts(@RequestParam String keyword) {
+        return productService.searchProducts(keyword);
+    }
 
-    return productService.getProductsByPage(page, size);
-}
-@GetMapping("/browse")
-public Page<ProductDTO> browseProducts(
-        @RequestParam(defaultValue = "") String keyword,
-        @RequestParam(required = false) Long categoryId,
-        @RequestParam(defaultValue = "") String subcategory,
-        @RequestParam(defaultValue = "") String brand,
-        @RequestParam(defaultValue = "all") String stockStatus,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "20") int size,
-        @RequestParam(defaultValue = "productName") String sort,
-        @RequestParam(defaultValue = "asc") String direction) {
-    return productService.browseProducts(keyword, categoryId, subcategory, brand, stockStatus, page, size, sort, direction);
-}
-@GetMapping("/filter")
-public Page<ProductDTO> filterProducts(
+    @GetMapping("/page")
+    public Page<ProductDTO> getProductsByPage(
+            @RequestParam int page,
+            @RequestParam int size) {
+        return productService.getProductsByPage(page, size);
+    }
 
-        @RequestParam String keyword,
+    @GetMapping("/browse")
+    public Page<ProductDTO> browseProducts(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(defaultValue = "") String subcategory,
+            @RequestParam(defaultValue = "") String brand,
+            @RequestParam(defaultValue = "all") String stockStatus,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "productName") String sort,
+            @RequestParam(defaultValue = "asc") String direction) {
+        return productService.browseProducts(keyword, categoryId, subcategory, brand, stockStatus, page, size, sort, direction);
+    }
 
-        @RequestParam int page,
+    @GetMapping("/filter")
+    public Page<ProductDTO> filterProducts(
+            @RequestParam String keyword,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sortField) {
+        return productService.filterProducts(
+                keyword,
+                page,
+                size,
+                sortField);
+    }
 
-        @RequestParam int size,
+    @GetMapping("/low-stock")
+    public List<ProductDTO> getLowStockProducts() {
+        return productService.getLowStockProducts();
+    }
 
-        @RequestParam String sortField) {
+    @GetMapping("/expiring")
+    public List<ProductDTO> getExpiringProducts(@RequestParam LocalDate date) {
+        return productService.getExpiringProducts(date);
+    }
 
-    return productService.filterProducts(
-            keyword,
-            page,
-            size,
-            sortField);
-}
-@GetMapping("/low-stock")
-public List<ProductDTO> getLowStockProducts() {
+    @GetMapping("/sort")
+    public List<ProductDTO> getProductsSorted(
+            @RequestParam String field,
+            @RequestParam(defaultValue = "asc") String direction) {
+        return productService.getProductsSorted(field, direction);
+    }
 
-    return productService.getLowStockProducts();
-}
-@GetMapping("/expiring")
-public List<ProductDTO> getExpiringProducts(
-        @RequestParam LocalDate date) {
+    @GetMapping("/{id}")
+    public ProductDTO getProductById(@PathVariable Long id) {
+        return productService.getProductById(id);
+    }
 
-    return productService.getExpiringProducts(date);
-}
-@GetMapping("/sort")
-public List<ProductDTO> getProductsSorted(
-        @RequestParam String field,
-        @RequestParam(defaultValue = "asc") String direction) {
+    @GetMapping("/statistics")
+    public ProductStatisticsDTO getProductStatistics() {
+        return productService.getProductStatistics();
+    }
 
-    return productService.getProductsSorted(field, direction);
-}
-@GetMapping("/{id}")
-public Optional<ProductDTO> getProductById(@PathVariable Long id) {
-    return productService.getProductById(id);
-} 
-@GetMapping("/statistics")
-public ProductStatisticsDTO getProductStatistics() {
+    @GetMapping("/charts/stock")
+    public List<ChartDataDTO> getStockChartData() {
+        return productService.getStockChartData();
+    }
 
-    return productService.getProductStatistics();
-}
-@GetMapping("/charts/stock")
-public List<ChartDataDTO> getStockChartData() {
+    @GetMapping("/charts/inventory-value")
+    public List<ChartDataDTO> getInventoryValueChartData() {
+        return productService.getInventoryValueChartData();
+    }
 
-    return productService.getStockChartData();
-}
-@GetMapping("/charts/inventory-value")
-public List<ChartDataDTO> getInventoryValueChartData() {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductDTO updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductDTO productDTO) {
+        return productService.updateProduct(id, productDTO);
+    }
 
-    return productService.getInventoryValueChartData();
-}
-@PutMapping("/{id}")
-public ProductDTO updateProduct(
-        @PathVariable Long id,
-        @Valid @RequestBody ProductDTO productDTO) {
-
-    return productService.updateProduct(id, productDTO);
-}
-@DeleteMapping("/{id}")
-public String deleteProduct(@PathVariable Long id) {
-
-    productService.deleteProduct(id);
-
-    return "Product deleted successfully!";
-
-}
-
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return "Product deleted successfully!";
+    }
 }

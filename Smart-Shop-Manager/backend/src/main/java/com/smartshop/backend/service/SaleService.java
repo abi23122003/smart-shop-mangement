@@ -21,6 +21,7 @@ import com.smartshop.backend.repository.CreditTransactionRepository;
 import com.smartshop.backend.repository.CustomerRepository;
 import com.smartshop.backend.repository.ProductRepository;
 import com.smartshop.backend.repository.SaleRepository;
+import jakarta.persistence.EntityNotFoundException;
 
 
 @Service
@@ -49,7 +50,7 @@ public class SaleService {
 public SaleDTO saveSale(SaleDTO saleDTO) {
 
    Customer customer = customerRepository.findById(saleDTO.getCustomerId())
-        .orElseThrow(() -> new RuntimeException("Customer not found"));
+        .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + saleDTO.getCustomerId()));
 
    if ("Credit".equalsIgnoreCase(saleDTO.getPaymentMethod()) && Boolean.FALSE.equals(customer.getCreditEnabled())) {
        throw new IllegalArgumentException("This customer is not enabled for credit purchases");
@@ -72,10 +73,10 @@ List<SaleItem> saleItems = new ArrayList<>();
 for (SaleItemDTO itemDTO : saleDTO.getSaleItems()) {
 
     Product product = productRepository.findById(itemDTO.getProductId())
-            .orElseThrow(() -> new RuntimeException("Product not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + itemDTO.getProductId()));
 
     if (product.getQuantity() < itemDTO.getQuantity()) {
-        throw new RuntimeException(
+        throw new IllegalArgumentException(
                 "Insufficient stock for product: " + product.getProductName());
     }
 
@@ -148,7 +149,7 @@ public List<SaleDTO> getAllSales() {
 public SaleDTO getSaleById(Long id) {
 
     Sale sale = saleRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Sale not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Sale not found with id: " + id));
 
     return SaleMapper.toDTO(sale);
 }
@@ -156,7 +157,7 @@ public SaleDTO getSaleById(Long id) {
 public void deleteSale(Long id) {
 
     Sale sale = saleRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Sale not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Sale not found with id: " + id));
 
     for (SaleItem saleItem : sale.getSaleItems()) {
         Product product = saleItem.getProduct();

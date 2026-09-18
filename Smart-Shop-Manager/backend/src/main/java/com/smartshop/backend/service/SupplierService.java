@@ -15,6 +15,7 @@ import com.smartshop.backend.dto.SupplierStatisticsDTO;
 import com.smartshop.backend.entity.Supplier;
 import com.smartshop.backend.mapper.SupplierMapper;
 import com.smartshop.backend.repository.SupplierRepository;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class SupplierService {
@@ -41,11 +42,11 @@ public class SupplierService {
                 .map(SupplierMapper::toDTO)
                 .toList();
     }
-    public Optional<SupplierDTO> getSupplierById(Long id) {
+    public SupplierDTO getSupplierById(Long id) {
 
-    Optional<Supplier> supplier = supplierRepository.findById(id);
-
-    return supplier.map(SupplierMapper::toDTO);
+    return supplierRepository.findById(id)
+            .map(SupplierMapper::toDTO)
+            .orElseThrow(() -> new EntityNotFoundException("Supplier not found with id: " + id));
 }
 public List<SupplierDTO> searchSuppliers(String keyword) {
 
@@ -92,11 +93,8 @@ public Page<SupplierDTO> filterSuppliers(
 }
 public SupplierDTO updateSupplier(Long id, SupplierDTO updatedSupplier) {
 
-    Optional<Supplier> existingSupplier = supplierRepository.findById(id);
-
-    if (existingSupplier.isPresent()) {
-
-        Supplier supplier = existingSupplier.get();
+    Supplier supplier = supplierRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Supplier not found with id: " + id));
 
         supplier.setSupplierCode(updatedSupplier.getSupplierCode());
         supplier.setSupplierName(updatedSupplier.getSupplierName());
@@ -110,9 +108,6 @@ public SupplierDTO updateSupplier(Long id, SupplierDTO updatedSupplier) {
         Supplier savedSupplier = supplierRepository.save(supplier);
 
         return SupplierMapper.toDTO(savedSupplier);
-    }
-
-    return null;
 }
 public void deleteSupplier(Long id) {
 

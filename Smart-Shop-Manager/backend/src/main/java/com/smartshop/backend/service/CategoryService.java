@@ -10,6 +10,7 @@ import com.smartshop.backend.dto.CategoryStatisticsDTO;
 import com.smartshop.backend.entity.Category;
 import com.smartshop.backend.mapper.CategoryMapper;
 import com.smartshop.backend.repository.CategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -35,19 +36,16 @@ public class CategoryService {
             .map(CategoryMapper::toDTO)
             .toList();
 }
-public Optional<CategoryDTO> getCategoryById(Long id) {
+public CategoryDTO getCategoryById(Long id) {
 
-    Optional<Category> category = categoryRepository.findById(id);
-
-    return category.map(CategoryMapper::toDTO);
+    return categoryRepository.findById(id)
+            .map(CategoryMapper::toDTO)
+            .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
 }
 public CategoryDTO updateCategory(Long id, CategoryDTO updatedCategory) {
 
-    Optional<Category> existingCategory = categoryRepository.findById(id);
-
-    if (existingCategory.isPresent()) {
-
-        Category category = existingCategory.get();
+    Category category = categoryRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
 
         category.setName(updatedCategory.getName());
         category.setDescription(updatedCategory.getDescription());
@@ -56,9 +54,6 @@ public CategoryDTO updateCategory(Long id, CategoryDTO updatedCategory) {
         Category savedCategory = categoryRepository.save(category);
 
         return CategoryMapper.toDTO(savedCategory);
-    }
-
-    return null;
 }
 public Page<CategoryDTO> getCategoriesByPage(int page, int size) {
 

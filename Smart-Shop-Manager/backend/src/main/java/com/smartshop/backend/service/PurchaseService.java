@@ -17,6 +17,7 @@ import com.smartshop.backend.mapper.PurchaseMapper;
 import com.smartshop.backend.repository.ProductRepository;
 import com.smartshop.backend.repository.PurchaseRepository;
 import com.smartshop.backend.repository.SupplierRepository;
+import jakarta.persistence.EntityNotFoundException;
 @Service
 public class PurchaseService {
 
@@ -39,7 +40,7 @@ public PurchaseDTO savePurchase(PurchaseDTO purchaseDTO) {
 
     // Step 1: Find Supplier
     Supplier supplier = supplierRepository.findById(purchaseDTO.getSupplierId())
-            .orElseThrow(() -> new RuntimeException("Supplier not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Supplier not found with id: " + purchaseDTO.getSupplierId()));
 
     // Step 2: Create Purchase
     Purchase purchase = new Purchase();
@@ -54,7 +55,7 @@ public PurchaseDTO savePurchase(PurchaseDTO purchaseDTO) {
     for (PurchaseItemDTO itemDTO : purchaseDTO.getPurchaseItems()) {
 
         Product product = productRepository.findById(itemDTO.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + itemDTO.getProductId()));
                 // Update Product Stock
         product.setQuantity(
         product.getQuantity() + itemDTO.getQuantity()

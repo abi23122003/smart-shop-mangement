@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.smartshop.backend.mapper.CreditTransactionMapper;
 import com.smartshop.backend.entity.Credit;
 import com.smartshop.backend.entity.CreditTransaction;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import com.smartshop.backend.dto.CreditDTO;
 import com.smartshop.backend.dto.CreditTransactionDTO;
@@ -33,7 +34,7 @@ public class CreditServiceImpl implements CreditService {
 public CreditDTO addCreditPurchase(Long customerId, Double amount, String remarks) {
 
     Customer customer = customerRepository.findById(customerId)
-            .orElseThrow(() -> new RuntimeException("Customer not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + customerId));
 
     Optional<Credit> optionalCredit = creditRepository.findByCustomer(customer);
 
@@ -79,10 +80,10 @@ return CreditMapper.toDTO(credit);
 public CreditDTO recordPayment(Long customerId, Double amount, String remarks) {
 
     Customer customer = customerRepository.findById(customerId)
-            .orElseThrow(() -> new RuntimeException("Customer not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + customerId));
 
     Credit credit = creditRepository.findByCustomer(customer)
-            .orElseThrow(() -> new RuntimeException("No credit account found"));
+            .orElseThrow(() -> new EntityNotFoundException("No credit account found for customer id: " + customerId));
 
     credit.setTotalPaid(credit.getTotalPaid() + amount);
     credit.setBalance(credit.getBalance() - amount);
@@ -112,10 +113,10 @@ public CreditDTO recordPayment(Long customerId, Double amount, String remarks) {
 public CreditDTO getCreditByCustomer(Long customerId) {
 
     Customer customer = customerRepository.findById(customerId)
-            .orElseThrow(() -> new RuntimeException("Customer not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + customerId));
 
     Credit credit = creditRepository.findByCustomer(customer)
-            .orElseThrow(() -> new RuntimeException("No credit account found"));
+            .orElseThrow(() -> new EntityNotFoundException("No credit account found for customer id: " + customerId));
 
     return CreditMapper.toDTO(credit);
 }
@@ -131,10 +132,10 @@ public List<CreditDTO> getAllCredits() {
 public List<CreditTransactionDTO> getTransactionHistory(Long customerId) {
 
     Customer customer = customerRepository.findById(customerId)
-            .orElseThrow(() -> new RuntimeException("Customer not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + customerId));
 
     Credit credit = creditRepository.findByCustomer(customer)
-            .orElseThrow(() -> new RuntimeException("No credit account found"));
+            .orElseThrow(() -> new EntityNotFoundException("No credit account found for customer id: " + customerId));
 
     return creditTransactionRepository.findByCredit(credit)
             .stream()

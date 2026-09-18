@@ -19,6 +19,7 @@ import com.smartshop.backend.entity.Product;
 import com.smartshop.backend.mapper.ProductMapper;
 import com.smartshop.backend.repository.CategoryRepository;
 import com.smartshop.backend.repository.ProductRepository;
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ProductService {
@@ -35,7 +36,7 @@ public class ProductService {
     Product product = ProductMapper.toEntity(productDTO);
 
     Category category = categoryRepository.findById(productDTO.getCategoryId())
-            .orElseThrow(() -> new RuntimeException("Category not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + productDTO.getCategoryId()));
 
     product.setCategory(category);
 
@@ -54,7 +55,7 @@ public List<ProductDTO> getAllProducts() {
 public ProductDTO restockProduct(ProductRestockRequest request) {
     String barcode = request.getBarcode().trim();
     Product product = productRepository.findByBarcode(barcode)
-            .orElseThrow(() -> new RuntimeException("No product found for barcode: " + barcode));
+            .orElseThrow(() -> new EntityNotFoundException("No product found for barcode: " + barcode));
 
     int currentQuantity = product.getQuantity() == null ? 0 : product.getQuantity();
     product.setQuantity(currentQuantity + request.getQuantity());
@@ -162,19 +163,16 @@ public List<ChartDataDTO> getInventoryValueChartData() {
 
     return productRepository.getInventoryValueChartData();
 }
-public Optional<ProductDTO> getProductById(Long id) {
+public ProductDTO getProductById(Long id) {
 
-    Optional<Product> product = productRepository.findById(id);
-
-    return product.map(ProductMapper::toDTO);
+    return productRepository.findById(id)
+            .map(ProductMapper::toDTO)
+            .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 }
-    public ProductDTO updateProduct(Long id, ProductDTO updatedProduct){
+    public ProductDTO updateProduct(Long id, ProductDTO updatedProduct) {
 
-    Optional<Product> existingProduct = productRepository.findById(id);
-
-    if (existingProduct.isPresent()) {
-
-        Product product = existingProduct.get();
+    Product product = productRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 
         validateBarcode(updatedProduct.getBarcode(), id);
 
@@ -184,9 +182,9 @@ public Optional<ProductDTO> getProductById(Long id) {
         product.setBrand(updatedProduct.getBrand());
         product.setSubcategory(updatedProduct.getSubcategory());
         Category category = categoryRepository.findById(updatedProduct.getCategoryId())
-        .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + updatedProduct.getCategoryId()));
 
-product.setCategory(category);
+        product.setCategory(category);
         product.setVariant(updatedProduct.getVariant());
         product.setUnit(updatedProduct.getUnit());
         product.setQuantity(updatedProduct.getQuantity());
@@ -200,13 +198,10 @@ product.setCategory(category);
         Product savedProduct = productRepository.save(product);
 
         return ProductMapper.toDTO(savedProduct);
-    }
-
-    return null;
 }
 public void deleteProduct(Long id) {
     Product product = productRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Product not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
     product.setActive(false);
     productRepository.save(product);
 }

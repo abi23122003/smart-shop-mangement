@@ -13,6 +13,7 @@ import com.smartshop.backend.dto.CustomerStatisticsDTO;
 import com.smartshop.backend.entity.Customer;
 import com.smartshop.backend.mapper.CustomerMapper;
 import com.smartshop.backend.repository.CustomerRepository;
+import jakarta.persistence.EntityNotFoundException;
 @Service
 public class CustomerService {
 
@@ -47,7 +48,7 @@ public class CustomerService {
 public CustomerDTO getCustomerById(Long id) {
 
     Customer customer = customerRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Customer not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + id));
 
     return CustomerMapper.toDTO(customer);
 }
@@ -55,7 +56,7 @@ public CustomerDTO getCustomerById(Long id) {
 public CustomerDTO updateCustomer(Long id, CustomerDTO customerDTO) {
 
     Customer customer = customerRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Customer not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + id));
 
     customer.setCustomerCode(customerDTO.getCustomerCode());
     customer.setCustomerName(customerDTO.getCustomerName());
@@ -76,7 +77,7 @@ public CustomerDTO updateCustomer(Long id, CustomerDTO customerDTO) {
 public String deleteCustomer(Long id) {
 
     Customer customer = customerRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Customer not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + id));
 
     customerRepository.delete(customer);
 

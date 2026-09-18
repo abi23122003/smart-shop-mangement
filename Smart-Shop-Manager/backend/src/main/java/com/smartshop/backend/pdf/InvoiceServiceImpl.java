@@ -32,7 +32,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public ByteArrayInputStream generateInvoice(Long saleId) {
 
         Sale sale = saleRepository.findById(saleId)
-                .orElseThrow(() -> new RuntimeException("Sale not found"));
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Sale not found with id: " + saleId));
 
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
