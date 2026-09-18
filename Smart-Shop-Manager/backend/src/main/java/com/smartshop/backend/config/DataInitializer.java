@@ -1,5 +1,8 @@
 package com.smartshop.backend.config;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,16 +16,45 @@ import com.smartshop.backend.repository.UserRepository;
 @Configuration
 public class DataInitializer {
 
+    @Value("${admin.username}")
+    private String adminUsername;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
     @Bean
     CommandLineRunner init(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            CategoryRepository categoryRepository) {
 
         return args -> {
-            if (userRepository.findByUsername("admin").isEmpty()) {
+            List<User> adminUsers = userRepository.findByRole("ROLE_ADMIN");
+
+            if (!adminUsers.isEmpty()) {
+                // If an admin already matches the target username, use that one; otherwise take the first existing admin
+                User targetAdmin = adminUsers.stream()
+                        .filter(u -> adminUsername.equals(u.getUsername()))
+                        .findFirst()
+                        .orElse(adminUsers.get(0));
+
+                boolean needsUpdate = false;
+                if (!adminUsername.equals(targetAdmin.getUsername())) {
+                    targetAdmin.setUsername(adminUsername);
+                    needsUpdate = true;
+                }
+                if (!passwordEncoder.matches(adminPassword, targetAdmin.getPassword())) {
+                    targetAdmin.setPassword(passwordEncoder.encode(adminPassword));
+                    needsUpdate = true;
+                }
+                if (needsUpdate) {
+                    targetAdmin.setRole("ROLE_ADMIN");
+                    userRepository.save(targetAdmin);
+                }
+            } else {
+                // Fresh install: create the initial single admin user
                 User admin = new User();
-                admin.setUsername("admin");
-                admin.setPassword(passwordEncoder.encode("admin123"));
+                admin.setUsername(adminUsername);
+                admin.setPassword(passwordEncoder.encode(adminPassword));
                 admin.setRole("ROLE_ADMIN");
                 userRepository.save(admin);
             }
